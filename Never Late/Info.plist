@@ -18,6 +18,10 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Never Late reads your calendar events to schedule persistent alarms so you never miss a meeting.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Never Late reads your calendar events to schedule persistent alarms so you never miss a meeting.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

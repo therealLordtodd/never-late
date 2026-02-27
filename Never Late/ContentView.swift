@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var model = AppViewModel()
     @State private var showMissionBanner = false
+    @State private var showRefreshError = false
 
     var body: some View {
         ZStack {
@@ -70,7 +71,9 @@ struct ContentView: View {
                 title: "Calendar Access",
                 status: calendarStatusText,
                 statusColor: calendarStatusColor,
-                showEnable: model.hasCalendarAccess == false && model.calendarStatus != .denied,
+                showEnable: model.hasCalendarAccess == false
+                    && model.calendarStatus != .denied
+                    && model.calendarStatus != .restricted,
                 showSettings: model.calendarStatus == .denied,
                 action: { Task { await model.requestCalendarAccess() } }
             )
@@ -175,12 +178,23 @@ struct ContentView: View {
                 .foregroundStyle(NLColors.textSecondary)
 
             Button(model.isRefreshing ? "Refreshing…" : "Refresh Alarms") {
+                guard model.hasCalendarAccess else {
+                    showRefreshError = true
+                    return
+                }
+                showRefreshError = false
                 Task { await model.refreshCalendars() }
             }
             .buttonStyle(.borderedProminent)
             .tint(NLColors.primary)
             .disabled(model.isRefreshing)
             .frame(maxWidth: .infinity)
+
+            if showRefreshError {
+                Text("Enable calendar access above first.")
+                    .font(NLTypography.caption)
+                    .foregroundStyle(NLColors.warning)
+            }
         }
         .nlCardStyle()
     }

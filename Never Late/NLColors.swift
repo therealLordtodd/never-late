@@ -14,14 +14,14 @@ enum NLColors {
     // MARK: - Brand
     static let primary         = Color(red: 0.961, green: 0.651, blue: 0.137) // #F5A623
 
+    // MARK: - Status
+    static let connected       = Color(red: 0.298, green: 0.686, blue: 0.314) // #4CAF50
+    static let destructive     = Color(red: 1.000, green: 0.322, blue: 0.322) // #FF5252
+    static let error           = destructive // same red; diverge here if design calls for distinct error vs destructive colors
+    static let warning         = Color(red: 0.961, green: 0.651, blue: 0.137) // reuses primary gold
+
     // MARK: - Text
     static let textPrimary     = Color.white
     static let textSecondary   = Color(red: 0.478, green: 0.608, blue: 0.749) // #7A9BBF
     static let textTertiary    = Color(red: 0.290, green: 0.416, blue: 0.541) // #4A6A8A
-
-    // MARK: - Status
-    static let connected       = Color(red: 0.298, green: 0.686, blue: 0.314) // #4CAF50
-    static let destructive     = Color(red: 1.000, green: 0.322, blue: 0.322) // #FF5252
-    static let error           = Color(red: 1.000, green: 0.322, blue: 0.322) // #FF5252
-    static let warning         = Color(red: 0.961, green: 0.651, blue: 0.137) // reuses primary gold
 }

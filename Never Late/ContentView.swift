@@ -55,7 +55,7 @@ struct ContentView: View {
             Image("ClockHeadMascot")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 90, height: 90)
+                .frame(width: 130, height: 130)
                 .clipShape(RoundedRectangle(cornerRadius: NLSpacing.cardRadius, style: .continuous))
         }
         .padding(.top, NLSpacing.compactGap)

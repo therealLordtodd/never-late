@@ -15,4 +15,8 @@ enum NLTypography {
     static let caption       = Font.system(size: 13, weight: .regular,  design: .default)
     /// 13pt Mono — IDs, timestamps, technical values
     static let mono          = Font.system(size: 13, weight: .regular,  design: .monospaced)
+    /// 44pt — large decorative icons (e.g. mission accomplished checkmark)
+    static let largeIconSize:         CGFloat = 44
+    /// Letter tracking for sectionHeader — always applied alongside NLTypography.sectionHeader
+    static let sectionHeaderTracking: CGFloat = 0.5
 }

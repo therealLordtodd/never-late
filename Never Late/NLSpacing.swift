@@ -11,4 +11,5 @@ enum NLSpacing {
     static let pagePadding: CGFloat = 24
     static let cardRadius:  CGFloat = 20
     static let buttonRadius: CGFloat = 12
+    static let scrollBottomPadding: CGFloat = 48
 }

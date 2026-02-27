@@ -24,7 +24,7 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, NLSpacing.pagePadding)
                 .padding(.top, NLSpacing.pagePadding)
-                .padding(.bottom, 48)
+                .padding(.bottom, NLSpacing.scrollBottomPadding)
             }
         }
         .preferredColorScheme(.dark)
@@ -108,7 +108,7 @@ struct ContentView: View {
             Spacer()
             if showEnable {
                 Button("Enable", action: action)
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.borderedProminent)
                     .tint(NLColors.primary)
                     .controlSize(.small)
             } else if showSettings {
@@ -190,7 +190,7 @@ struct ContentView: View {
     private var missionAccomplishedBanner: some View {
         VStack(spacing: NLSpacing.innerGap) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 44))
+                .font(.system(size: NLTypography.largeIconSize))
                 .foregroundStyle(NLColors.primary)
             Text("You're covered.")
                 .font(NLTypography.pageTitle)
@@ -223,24 +223,13 @@ struct ContentView: View {
     }
 
     private var calendarStatusText: String {
-        if #available(iOS 17.0, *) {
-            switch model.calendarStatus {
-            case .fullAccess:    return "✓ Good to go"
-            case .writeOnly:     return "Write-only access"
-            case .denied:        return "Tap to fix in Settings"
-            case .restricted:    return "Restricted by device policy"
-            case .notDetermined: return "Not yet"
-            @unknown default:    return "Unknown"
-            }
-        } else {
-            switch model.calendarStatus {
-            case .authorized, .fullAccess: return "✓ Good to go"
-            case .writeOnly:     return "Write-only access"
-            case .denied:        return "Tap to fix in Settings"
-            case .restricted:    return "Restricted by device policy"
-            case .notDetermined: return "Not yet"
-            @unknown default:    return "Unknown"
-            }
+        switch model.calendarStatus {
+        case .fullAccess:    return "✓ Good to go"
+        case .writeOnly:     return "Write-only access"
+        case .denied:        return "Tap to fix in Settings"
+        case .restricted:    return "Restricted by device policy"
+        case .notDetermined: return "Not yet"
+        @unknown default:    return "Unknown"
         }
     }
 
@@ -270,10 +259,11 @@ struct ContentView: View {
     }
 
     /// Gold uppercase section label used at the top of each card.
+    @ViewBuilder
     private func cardSectionHeader(_ title: String) -> some View {
         Text(title.uppercased())
             .font(NLTypography.sectionHeader)
-            .tracking(0.5)
+            .tracking(NLTypography.sectionHeaderTracking)
             .foregroundStyle(NLColors.primary)
     }
 }

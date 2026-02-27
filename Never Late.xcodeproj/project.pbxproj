@@ -1,0 +1,570 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0B600D1C5115AAA03F569F6D /* Never_LateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF92DFECCBFB9B1230705E6B /* Never_LateTests.swift */; };
+		27E86F0FD602C3CEED44BE41 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3651854108C530C2E0EDA7 /* BackgroundRefresh.swift */; };
+		339128154096B0F424F29031 /* NLColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB619ED89543E46ABEB7A03 /* NLColors.swift */; };
+		473651D080CC46C61783A5AC /* NLTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791B0DE58986EC64C9051A1 /* NLTypography.swift */; };
+		573093F8BC90AEBBB1D8ABB3 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE706BC03863876A65D112F7 /* AppLog.swift */; };
+		5C6310F9BDBA2D7B290519AE /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D40C9E46010B743037A06FE /* SettingsStore.swift */; };
+		5EF0918DC3797F2E66ED058B /* Never_LateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C6602A279008538688B116 /* Never_LateUITests.swift */; };
+		65398F8DB8BE33E4A0ABFE9D /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962EEE1BBDA5130AC945E29C /* NotificationScheduler.swift */; };
+		67879B258688EC45FACD2826 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24552F087539A2E6974AB101 /* Preview Assets.xcassets */; };
+		716B5BFE921086BBE58B02A1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66776E1901586584F53AC7A /* AppDelegate.swift */; };
+		78E75DBA71C8C4815E8E8ECD /* CalendarAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DBE782C8368190475114A99 /* CalendarAccess.swift */; };
+		8745F4451D125BA8C223A0AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44513E0C71B31D1D26828660 /* ContentView.swift */; };
+		92AA0011661CAF9C8C03531A /* Never_LateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFC6E37DF836C305B22BE04C /* Never_LateApp.swift */; };
+		9DBE33E00B4CACD186F12557 /* ForegroundRefreshTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79832F2439951E2772DEACA7 /* ForegroundRefreshTimer.swift */; };
+		9F4E188FA1401426A0420659 /* NLSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826F93CB9BA8ED63D585C98E /* NLSpacing.swift */; };
+		A1E8E654576005D923A5156D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD44501328C7A07B263036B8 /* Assets.xcassets */; };
+		E5FE3D9FF4D3779611322EBE /* Never Late.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = 4A21C49932EB1085B755BE6C /* Never Late.xcodeproj */; };
+		E8BA036F329E44CA6A05855C /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F888E0C3671F96D653EE3D0 /* AppViewModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0E119FEDACA179FA2483B517 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB686E8ECE2EB150E9017814 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A136A4B2B4FF91E3BD01DE40;
+			remoteInfo = "Never Late";
+		};
+		401DC9BDF30D9235FEDBA69D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB686E8ECE2EB150E9017814 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A136A4B2B4FF91E3BD01DE40;
+			remoteInfo = "Never Late";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02B08E4EB9E13425171D0AE5 /* Never LateTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = "Never LateTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		16C6602A279008538688B116 /* Never_LateUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_LateUITests.swift; sourceTree = "<group>"; };
+		24552F087539A2E6974AB101 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2AE1C3A4F0513B9A72A6748F /* Never Late.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Never Late.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		414B8B334D928667DB8E3C3A /* Never LateUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = "Never LateUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		44513E0C71B31D1D26828660 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4A21C49932EB1085B755BE6C /* Never Late.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "Never Late.xcodeproj"; sourceTree = "<group>"; };
+		4F888E0C3671F96D653EE3D0 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		79832F2439951E2772DEACA7 /* ForegroundRefreshTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForegroundRefreshTimer.swift; sourceTree = "<group>"; };
+		7D40C9E46010B743037A06FE /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		7DBE782C8368190475114A99 /* CalendarAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAccess.swift; sourceTree = "<group>"; };
+		826F93CB9BA8ED63D585C98E /* NLSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLSpacing.swift; sourceTree = "<group>"; };
+		8791B0DE58986EC64C9051A1 /* NLTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLTypography.swift; sourceTree = "<group>"; };
+		962EEE1BBDA5130AC945E29C /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		9B3651854108C530C2E0EDA7 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
+		9CB619ED89543E46ABEB7A03 /* NLColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLColors.swift; sourceTree = "<group>"; };
+		AD44501328C7A07B263036B8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AE706BC03863876A65D112F7 /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
+		BFC6E37DF836C305B22BE04C /* Never_LateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_LateApp.swift; sourceTree = "<group>"; };
+		EFF18513F35907B99A19B010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F66776E1901586584F53AC7A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FF92DFECCBFB9B1230705E6B /* Never_LateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_LateTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		16BA3470DF63E6291462D43D /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				24552F087539A2E6974AB101 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		45C1B4B6F426F1B955CB21CF /* Never LateTests */ = {
+			isa = PBXGroup;
+			children = (
+				FF92DFECCBFB9B1230705E6B /* Never_LateTests.swift */,
+			);
+			path = "Never LateTests";
+			sourceTree = "<group>";
+		};
+		5CB252A71A2D4BF408231A1D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2AE1C3A4F0513B9A72A6748F /* Never Late.app */,
+				02B08E4EB9E13425171D0AE5 /* Never LateTests.xctest */,
+				414B8B334D928667DB8E3C3A /* Never LateUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5FEF7A0D2F52529B004598D7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		70D23C0F54A577DD840CF948 = {
+			isa = PBXGroup;
+			children = (
+				7FD8FFFAC2860475EBFBB844 /* Never Late */,
+				45C1B4B6F426F1B955CB21CF /* Never LateTests */,
+				BF5D5506359B6C0531CBAB80 /* Never LateUITests */,
+				5CB252A71A2D4BF408231A1D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7FD8FFFAC2860475EBFBB844 /* Never Late */ = {
+			isa = PBXGroup;
+			children = (
+				F66776E1901586584F53AC7A /* AppDelegate.swift */,
+				AE706BC03863876A65D112F7 /* AppLog.swift */,
+				4F888E0C3671F96D653EE3D0 /* AppViewModel.swift */,
+				AD44501328C7A07B263036B8 /* Assets.xcassets */,
+				9B3651854108C530C2E0EDA7 /* BackgroundRefresh.swift */,
+				7DBE782C8368190475114A99 /* CalendarAccess.swift */,
+				44513E0C71B31D1D26828660 /* ContentView.swift */,
+				79832F2439951E2772DEACA7 /* ForegroundRefreshTimer.swift */,
+				EFF18513F35907B99A19B010 /* Info.plist */,
+				4A21C49932EB1085B755BE6C /* Never Late.xcodeproj */,
+				BFC6E37DF836C305B22BE04C /* Never_LateApp.swift */,
+				9CB619ED89543E46ABEB7A03 /* NLColors.swift */,
+				826F93CB9BA8ED63D585C98E /* NLSpacing.swift */,
+				8791B0DE58986EC64C9051A1 /* NLTypography.swift */,
+				962EEE1BBDA5130AC945E29C /* NotificationScheduler.swift */,
+				7D40C9E46010B743037A06FE /* SettingsStore.swift */,
+				16BA3470DF63E6291462D43D /* Preview Content */,
+			);
+			path = "Never Late";
+			sourceTree = "<group>";
+		};
+		BF5D5506359B6C0531CBAB80 /* Never LateUITests */ = {
+			isa = PBXGroup;
+			children = (
+				16C6602A279008538688B116 /* Never_LateUITests.swift */,
+			);
+			path = "Never LateUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A136A4B2B4FF91E3BD01DE40 /* Never Late */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37B3EC54CA006A2954C8342F /* Build configuration list for PBXNativeTarget "Never Late" */;
+			buildPhases = (
+				EF8CC4AED1F84AD373697D24 /* Sources */,
+				1039D1430FA1D7BC4904387A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Never Late";
+			packageProductDependencies = (
+			);
+			productName = "Never Late";
+			productReference = 2AE1C3A4F0513B9A72A6748F /* Never Late.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BB9F728D605025460204B82E /* Never LateUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A46BADDEE9DB9AA59B9D61E9 /* Build configuration list for PBXNativeTarget "Never LateUITests" */;
+			buildPhases = (
+				2BE59D18A54FE26CD57E6C23 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C7839B428FEBFF282464A0B8 /* PBXTargetDependency */,
+			);
+			name = "Never LateUITests";
+			packageProductDependencies = (
+			);
+			productName = "Never LateUITests";
+			productReference = 414B8B334D928667DB8E3C3A /* Never LateUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D6206E387D97B365A52A876D /* Never LateTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 121CB0B094F281C89F9D1EC4 /* Build configuration list for PBXNativeTarget "Never LateTests" */;
+			buildPhases = (
+				ECFA12FD7B65E56F05CA6E23 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A7B05980AC30C3DE2FF95697 /* PBXTargetDependency */,
+			);
+			name = "Never LateTests";
+			packageProductDependencies = (
+			);
+			productName = "Never LateTests";
+			productReference = 02B08E4EB9E13425171D0AE5 /* Never LateTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FB686E8ECE2EB150E9017814 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					BB9F728D605025460204B82E = {
+						TestTargetID = A136A4B2B4FF91E3BD01DE40;
+					};
+				};
+			};
+			buildConfigurationList = DE4287769B0039E06019B1D8 /* Build configuration list for PBXProject "Never Late" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 70D23C0F54A577DD840CF948;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 5FEF7A0D2F52529B004598D7 /* Products */;
+					ProjectRef = 4A21C49932EB1085B755BE6C /* Never Late.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				A136A4B2B4FF91E3BD01DE40 /* Never Late */,
+				D6206E387D97B365A52A876D /* Never LateTests */,
+				BB9F728D605025460204B82E /* Never LateUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1039D1430FA1D7BC4904387A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1E8E654576005D923A5156D /* Assets.xcassets in Resources */,
+				E5FE3D9FF4D3779611322EBE /* Never Late.xcodeproj in Resources */,
+				67879B258688EC45FACD2826 /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2BE59D18A54FE26CD57E6C23 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5EF0918DC3797F2E66ED058B /* Never_LateUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ECFA12FD7B65E56F05CA6E23 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0B600D1C5115AAA03F569F6D /* Never_LateTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF8CC4AED1F84AD373697D24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				716B5BFE921086BBE58B02A1 /* AppDelegate.swift in Sources */,
+				573093F8BC90AEBBB1D8ABB3 /* AppLog.swift in Sources */,
+				E8BA036F329E44CA6A05855C /* AppViewModel.swift in Sources */,
+				27E86F0FD602C3CEED44BE41 /* BackgroundRefresh.swift in Sources */,
+				78E75DBA71C8C4815E8E8ECD /* CalendarAccess.swift in Sources */,
+				8745F4451D125BA8C223A0AC /* ContentView.swift in Sources */,
+				9DBE33E00B4CACD186F12557 /* ForegroundRefreshTimer.swift in Sources */,
+				339128154096B0F424F29031 /* NLColors.swift in Sources */,
+				9F4E188FA1401426A0420659 /* NLSpacing.swift in Sources */,
+				473651D080CC46C61783A5AC /* NLTypography.swift in Sources */,
+				92AA0011661CAF9C8C03531A /* Never_LateApp.swift in Sources */,
+				65398F8DB8BE33E4A0ABFE9D /* NotificationScheduler.swift in Sources */,
+				5C6310F9BDBA2D7B290519AE /* SettingsStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A7B05980AC30C3DE2FF95697 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A136A4B2B4FF91E3BD01DE40 /* Never Late */;
+			targetProxy = 401DC9BDF30D9235FEDBA69D /* PBXContainerItemProxy */;
+		};
+		C7839B428FEBFF282464A0B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A136A4B2B4FF91E3BD01DE40 /* Never Late */;
+			targetProxy = 0E119FEDACA179FA2483B517 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		20BD0CC6E88927CFE4111F2A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		666104EB55E331F33871C7A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Never Late";
+			};
+			name = Release;
+		};
+		835E92892BCB69258707EADC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Never Late/Info.plist";
+				INFOPLIST_KEY_UIBackgroundModes = fetch;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.neverlate;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9500D1708F356724D507B5CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9CD8A6B945C75B0F46FE19CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Never Late";
+			};
+			name = Debug;
+		};
+		DD4292D2802858A25FD7F86D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Never Late/Info.plist";
+				INFOPLIST_KEY_UIBackgroundModes = fetch;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.neverlate;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FA059541B87D8B6F180F1A60 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Never Late.app/Never Late";
+			};
+			name = Debug;
+		};
+		FACB17F3E816F33D048DA184 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Never Late.app/Never Late";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		121CB0B094F281C89F9D1EC4 /* Build configuration list for PBXNativeTarget "Never LateTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA059541B87D8B6F180F1A60 /* Debug */,
+				FACB17F3E816F33D048DA184 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		37B3EC54CA006A2954C8342F /* Build configuration list for PBXNativeTarget "Never Late" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD4292D2802858A25FD7F86D /* Debug */,
+				835E92892BCB69258707EADC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A46BADDEE9DB9AA59B9D61E9 /* Build configuration list for PBXNativeTarget "Never LateUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9CD8A6B945C75B0F46FE19CE /* Debug */,
+				666104EB55E331F33871C7A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DE4287769B0039E06019B1D8 /* Build configuration list for PBXProject "Never Late" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20BD0CC6E88927CFE4111F2A /* Debug */,
+				9500D1708F356724D507B5CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FB686E8ECE2EB150E9017814 /* Project object */;
+}

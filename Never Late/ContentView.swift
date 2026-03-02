@@ -660,9 +660,10 @@ private struct AlarmSettingsSheet: View {
                             .foregroundStyle(NLColors.textPrimary)
                             .padding(.vertical, NLSpacing.tinyGap)
                         } label: {
-                            Text("Barrage")
-                                .font(NLTypography.pageTitle)
-                                .foregroundStyle(NLColors.textPrimary)
+                            Text("BARRAGE")
+                                .font(NLTypography.sectionHeader)
+                                .tracking(NLTypography.sectionHeaderTracking)
+                                .foregroundStyle(NLColors.primary)
                         }
 
                         GroupBox {
@@ -693,9 +694,10 @@ private struct AlarmSettingsSheet: View {
                             .foregroundStyle(NLColors.textPrimary)
                             .padding(.vertical, NLSpacing.tinyGap)
                         } label: {
-                            Text("Time To Leave")
-                                .font(NLTypography.pageTitle)
-                                .foregroundStyle(NLColors.textPrimary)
+                            Text("TIME TO LEAVE")
+                                .font(NLTypography.sectionHeader)
+                                .tracking(NLTypography.sectionHeaderTracking)
+                                .foregroundStyle(NLColors.primary)
                         }
 
                         GroupBox {
@@ -722,9 +724,10 @@ private struct AlarmSettingsSheet: View {
                             .foregroundStyle(NLColors.textPrimary)
                             .padding(.vertical, NLSpacing.tinyGap)
                         } label: {
-                            Text("Geofence Alarms")
-                                .font(NLTypography.pageTitle)
-                                .foregroundStyle(NLColors.textPrimary)
+                            Text("GEOFENCE ALARMS")
+                                .font(NLTypography.sectionHeader)
+                                .tracking(NLTypography.sectionHeaderTracking)
+                                .foregroundStyle(NLColors.primary)
                         }
                     }
                 }

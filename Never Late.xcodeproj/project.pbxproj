@@ -15,6 +15,7 @@
 		5C6310F9BDBA2D7B290519AE /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D40C9E46010B743037A06FE /* SettingsStore.swift */; };
 		5EF0918DC3797F2E66ED058B /* Never_LateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C6602A279008538688B116 /* Never_LateUITests.swift */; };
 		65398F8DB8BE33E4A0ABFE9D /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962EEE1BBDA5130AC945E29C /* NotificationScheduler.swift */; };
+		4D37A3729E164274B1EAC4FB /* AlarmHapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7843DAAC924719885F363E /* AlarmHapticsManager.swift */; };
 		67879B258688EC45FACD2826 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24552F087539A2E6974AB101 /* Preview Assets.xcassets */; };
 		716B5BFE921086BBE58B02A1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66776E1901586584F53AC7A /* AppDelegate.swift */; };
 		78E75DBA71C8C4815E8E8ECD /* CalendarAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DBE782C8368190475114A99 /* CalendarAccess.swift */; };
@@ -45,11 +46,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		02B08E4EB9E13425171D0AE5 /* Never LateTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = "Never LateTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		02B08E4EB9E13425171D0AE5 /* Never LateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Never LateTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C6602A279008538688B116 /* Never_LateUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_LateUITests.swift; sourceTree = "<group>"; };
 		24552F087539A2E6974AB101 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		2AE1C3A4F0513B9A72A6748F /* Never Late.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Never Late.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		414B8B334D928667DB8E3C3A /* Never LateUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = "Never LateUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AE1C3A4F0513B9A72A6748F /* Never Late.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Never Late.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		414B8B334D928667DB8E3C3A /* Never LateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Never LateUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		44513E0C71B31D1D26828660 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4A21C49932EB1085B755BE6C /* Never Late.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "Never Late.xcodeproj"; sourceTree = "<group>"; };
 		4F888E0C3671F96D653EE3D0 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
@@ -59,6 +60,7 @@
 		826F93CB9BA8ED63D585C98E /* NLSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLSpacing.swift; sourceTree = "<group>"; };
 		8791B0DE58986EC64C9051A1 /* NLTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLTypography.swift; sourceTree = "<group>"; };
 		962EEE1BBDA5130AC945E29C /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		2A7843DAAC924719885F363E /* AlarmHapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmHapticsManager.swift; sourceTree = "<group>"; };
 		9B3651854108C530C2E0EDA7 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
 		9CB619ED89543E46ABEB7A03 /* NLColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLColors.swift; sourceTree = "<group>"; };
 		AD44501328C7A07B263036B8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				F66776E1901586584F53AC7A /* AppDelegate.swift */,
+				2A7843DAAC924719885F363E /* AlarmHapticsManager.swift */,
 				AE706BC03863876A65D112F7 /* AppLog.swift */,
 				4F888E0C3671F96D653EE3D0 /* AppViewModel.swift */,
 				AD44501328C7A07B263036B8 /* Assets.xcassets */,
@@ -277,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				716B5BFE921086BBE58B02A1 /* AppDelegate.swift in Sources */,
+				4D37A3729E164274B1EAC4FB /* AlarmHapticsManager.swift in Sources */,
 				573093F8BC90AEBBB1D8ABB3 /* AppLog.swift in Sources */,
 				E8BA036F329E44CA6A05855C /* AppViewModel.swift in Sources */,
 				27E86F0FD602C3CEED44BE41 /* BackgroundRefresh.swift in Sources */,
@@ -375,12 +379,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-coNeverLateUITests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "Never Late";
@@ -392,15 +398,23 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				INFOPLIST_FILE = "Never Late/Info.plist";
-				INFOPLIST_KEY_UIBackgroundModes = fetch;
+				INFOPLIST_KEY_CFBundleDisplayName = "Never Late";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.neverlate;
+				MARKETING_VERSION = .1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-co.neverlate";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -464,12 +478,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-coNeverLateUITests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "Never Late";
@@ -481,15 +497,23 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				INFOPLIST_FILE = "Never Late/Info.plist";
-				INFOPLIST_KEY_UIBackgroundModes = fetch;
+				INFOPLIST_KEY_CFBundleDisplayName = "Never Late";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.neverlate;
+				MARKETING_VERSION = .1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-co.neverlate";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -497,12 +521,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-co.NeverLateTests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Never Late.app/Never Late";
@@ -513,12 +538,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 7HYTCLS98H;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.toddcowing.NeverLateTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bang-and-co.NeverLateTests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Never Late.app/Never Late";

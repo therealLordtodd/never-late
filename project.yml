@@ -1,0 +1,44 @@
+name: Never Late
+options:
+  bundleIdPrefix: com.toddcowing
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+
+schemes:
+  Never Late:
+    build:
+      targets:
+        Never Late: all
+
+targets:
+  Never Late:
+    type: application
+    platform: iOS
+    sources:
+      - path: Never Late
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.toddcowing.neverlate
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_UIBackgroundModes: [fetch]
+    info:
+      path: Never Late/Info.plist
+
+  Never LateTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Never LateTests
+    dependencies:
+      - target: Never Late
+
+  Never LateUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Never LateUITests
+    dependencies:
+      - target: Never Late

@@ -22,6 +22,15 @@
 	<string>Never Late reads your calendar events to schedule persistent alarms so you never miss a meeting.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Never Late reads your calendar events to schedule persistent alarms so you never miss a meeting.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Never Late uses your location to trigger arrive/leave calendar alarms when geofence alerts are configured.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Never Late uses your location to trigger arrive/leave calendar alarms when geofence alerts are configured.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

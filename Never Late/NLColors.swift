@@ -4,7 +4,7 @@ import SwiftUI
 /// Never use raw color values in views — always reference these tokens.
 enum NLColors {
     // MARK: - Backgrounds
-    static let appBackground   = Color(red: 0.051, green: 0.106, blue: 0.165) // #0D1B2A
+    static let appBackground   = Color(red: 0.035, green: 0.090, blue: 0.204) // #091734
     static let cardBackground  = Color(red: 0.086, green: 0.133, blue: 0.212) // #162236
 
     // MARK: - Borders

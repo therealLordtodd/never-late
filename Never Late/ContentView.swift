@@ -671,13 +671,13 @@ private struct AlarmSettingsSheet: View {
                                 Toggle("Enable time-to-leave alarms", isOn: $timeToLeaveEnabled)
                                 if timeToLeaveEnabled {
                                     Stepper(
-                                        "Prep buffer before leaving: \(timeToLeavePrepMinutes) min",
+                                        "Prep buffer before leaving:\n\(timeToLeavePrepMinutes) min",
                                         value: $timeToLeavePrepMinutes,
                                         in: 0...60,
                                         step: 5
                                     )
                                     Stepper(
-                                        "Fallback lead time: \(timeToLeaveFallbackMinutes) min",
+                                        "Fallback lead time:\n\(timeToLeaveFallbackMinutes) min",
                                         value: $timeToLeaveFallbackMinutes,
                                         in: 5...180,
                                         step: 5

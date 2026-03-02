@@ -1,7 +1,7 @@
 # B3 — Documentation
 
 **Pass:** Pass B
-**Priority:** P11
+**Priority:** P12
 **Focus:** Missing doc comments on public types/functions, complex logic without inline explanation, large files without section markers, undocumented edge cases and parameters.
 
 ## Agent Prompt

@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        AppLog.configureFromDefaults()
         UNUserNotificationCenter.current().delegate = self
         scheduler.registerCategories()
         GeofenceAlarmMonitor.shared.activate()

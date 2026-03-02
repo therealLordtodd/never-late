@@ -25,7 +25,7 @@ final class NotificationScheduler {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
-            AppLog.app.error("Notification authorization failed: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Notification authorization failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -68,7 +68,7 @@ final class NotificationScheduler {
         }
         guard identifiers.isEmpty == false else { return }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
-        AppLog.app.info("Cleared pending event alarms (count: \(identifiers.count, privacy: .public))")
+        AppLog.app.info("Cleared pending event alarms (count: \(identifiers.count))")
     }
 
     func clearPersistentAlarms() async {
@@ -84,7 +84,7 @@ final class NotificationScheduler {
         }
         guard identifiers.isEmpty == false else { return }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
-        AppLog.app.info("Cleared persistent alarms (count: \(identifiers.count, privacy: .public))")
+        AppLog.app.info("Cleared persistent alarms (count: \(identifiers.count))")
     }
 
     func clearDeliveredAlarmNotifications() async {
@@ -126,7 +126,8 @@ final class NotificationScheduler {
             effectiveAlarms = alarms
         }
 
-        let proximityAlarms = behavior.geofenceEnabled
+        let canUseGeofence = behavior.geofenceEnabled && GeofenceAlarmMonitor.shared.canMonitorProximityAlarms()
+        let proximityAlarms = canUseGeofence
             ? effectiveAlarms.filter {
                 guard let proximity = $0.alarm?.proximity else { return false }
                 return proximity != EKAlarmProximity.none
@@ -136,8 +137,13 @@ final class NotificationScheduler {
 
         let schedulableAlarms = effectiveAlarms.filter {
             guard let proximity = $0.alarm?.proximity else { return true }
-            return proximity == EKAlarmProximity.none
+            if proximity == EKAlarmProximity.none { return true }
+            // If geofence monitoring is off/unavailable, keep proximity alarms as timed fallbacks.
+            return canUseGeofence == false
         }
+        AppLog.app.info(
+            "Scheduling alarms total=\(effectiveAlarms.count) schedulable=\(schedulableAlarms.count) proximity=\(proximityAlarms.count) geofenceActive=\(canUseGeofence)"
+        )
         let barrageTarget = isSnoozeActive ? nil : schedulableAlarms.min { $0.fireDate < $1.fireDate }
         for alarm in schedulableAlarms {
             let event = alarm.event
@@ -170,7 +176,7 @@ final class NotificationScheduler {
             do {
                 try await center.add(request)
             } catch {
-                AppLog.app.error("Failed to schedule notification: \(error.localizedDescription, privacy: .public)")
+                AppLog.app.error("Failed to schedule notification: \(error.localizedDescription)")
             }
         }
 
@@ -219,7 +225,7 @@ final class NotificationScheduler {
                 prefix: NotificationConstants.geofenceBarragePrefix
             )
         } catch {
-            AppLog.app.error("Failed to schedule geofence trigger: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Failed to schedule geofence trigger: \(error.localizedDescription)")
         }
     }
 
@@ -252,7 +258,7 @@ final class NotificationScheduler {
                 prefix: NotificationConstants.snoozeBarragePrefix
             )
         } catch {
-            AppLog.app.error("Failed to schedule snooze: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Failed to schedule snooze: \(error.localizedDescription)")
         }
     }
 
@@ -288,7 +294,7 @@ final class NotificationScheduler {
             do {
                 try await center.add(request)
             } catch {
-                AppLog.app.error("Failed to schedule persistent alarm: \(error.localizedDescription, privacy: .public)")
+                AppLog.app.error("Failed to schedule persistent alarm: \(error.localizedDescription)")
                 break
             }
         }
@@ -349,6 +355,12 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
         DispatchQueue.main.async { [weak self] in
             self?.ensureAuthorizationForMonitoring()
         }
+    }
+
+    func canMonitorProximityAlarms() -> Bool {
+        guard CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) else { return false }
+        guard CLLocationManager.locationServicesEnabled() else { return false }
+        return manager.authorizationStatus == .authorizedAlways
     }
 
     func syncProximityAlarms(_ alarms: [CalendarEventAlarm]) {
@@ -561,13 +573,13 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        AppLog.app.error("Location manager error: \(error.localizedDescription, privacy: .public)")
+        AppLog.app.error("Location manager error: \(error.localizedDescription)")
     }
 
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
         let regionId = region?.identifier ?? "unknown"
         AppLog.app.error(
-            "Failed geofence monitoring for region \(regionId, privacy: .public): \(error.localizedDescription, privacy: .public)"
+            "Failed geofence monitoring for region \(regionId): \(error.localizedDescription)"
         )
     }
 }

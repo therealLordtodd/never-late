@@ -16,7 +16,7 @@ confident utility — not a generic settings screen.
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `NLColors.appBackground` | `#0D1B2A` | Full-screen background — always use with `.ignoresSafeArea()` |
+| `NLColors.appBackground` | `#091734` | Full-screen background — always use with `.ignoresSafeArea()` |
 | `NLColors.cardBackground` | `#162236` | Card / panel fill |
 | `NLColors.cardBorder` | `white @ 8%` | Subtle card edge — apply as-is, no extra opacity |
 | `NLColors.primary` | `#F5A623` | Gold — primary buttons, toggles, section headers, active states |

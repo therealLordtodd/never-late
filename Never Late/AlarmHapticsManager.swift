@@ -26,7 +26,7 @@ final class AlarmHapticsManager {
         do {
             try engine.start()
         } catch {
-            AppLog.app.error("Failed to start haptics engine: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Failed to start haptics engine: \(error.localizedDescription)")
             isActive = false
             return
         }
@@ -44,7 +44,7 @@ final class AlarmHapticsManager {
         if isActive {
             engine?.stop(completionHandler: { error in
                 if let error {
-                    AppLog.app.error("Failed to stop haptics engine: \(error.localizedDescription, privacy: .public)")
+                    AppLog.app.error("Failed to stop haptics engine: \(error.localizedDescription)")
                 }
             })
         }
@@ -68,7 +68,7 @@ final class AlarmHapticsManager {
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: 0)
         } catch {
-            AppLog.app.error("Failed to play haptic pulse: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Failed to play haptic pulse: \(error.localizedDescription)")
         }
     }
 }

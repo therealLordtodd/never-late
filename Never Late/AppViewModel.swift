@@ -74,6 +74,50 @@ final class AppViewModel: ObservableObject {
         CalendarAccess.hasReadAccess(calendarStatus)
     }
 
+    var uiElementContext: String {
+        """
+        screen: Home
+          alarmSettingsButtonVisible: true
+        section: Permissions
+          calendarAccessEnableButtonVisible: \((hasCalendarAccess == false && calendarStatus != .denied && calendarStatus != .restricted))
+          calendarAccessFixInSettingsButtonVisible: \(calendarStatus == .denied)
+          notificationsEnableButtonVisible: \(notificationStatus == .notDetermined)
+          notificationsFixInSettingsButtonVisible: \(notificationStatus == .denied)
+          locationAccessEnableButtonVisible: \((settings.geofenceEnabled && (locationStatus == .notDetermined || locationStatus == .authorizedWhenInUse)))
+          locationAccessFixInSettingsButtonVisible: \((settings.geofenceEnabled && locationStatus == .denied))
+        section: Calendars
+          calendarOpenSettingsButtonVisible: \((hasCalendarAccess && calendars.isEmpty))
+          chooseCalendarsButtonVisible: \(settings.selectedCalendarIds.isEmpty)
+          changeSelectionButtonVisible: \((settings.selectedCalendarIds.isEmpty == false))
+          selectedCalendarsCount: \(settings.selectedCalendarIds.count)
+        section: Refresh
+          refreshAlarmsButtonDisabled: \((isRefreshing || hasCalendarAccess == false))
+          upcomingAlarmsButtonVisible: true
+        screen: Calendar Selection
+          calendarSelectionCancelButtonVisible: \(settings.selectedCalendarIds.isEmpty == false)
+          calendarSelectionSaveButtonEnabledWhenSelectionCountGT0: true
+        screen: Upcoming Alarms
+          upcomingAlarmsDoneButtonVisible: true
+        screen: Alarm Settings
+        section: Barrage
+          barrageNotificationsStepper: \(settings.barrageCount)
+          secondsBetweenNotificationsStepper: \(settings.barrageIntervalSeconds)
+          defaultSnoozeMinutesStepper: \(settings.snoozeMinutes)
+        section: Time To Leave
+          enableTimeToLeaveAlarmsToggle: \(settings.timeToLeaveEnabled)
+          prepBufferBeforeLeavingStepper: \(settings.timeToLeavePrepMinutes)
+          fallbackLeadTimeStepper: \(settings.timeToLeaveFallbackMinutes)
+          travelModeDropdown: \(settings.timeToLeaveTransport.title)
+        section: Geofence Alarms
+          enableLocationEnterLeaveAlarmsToggle: \(settings.geofenceEnabled)
+          defaultGeofenceRadiusStepper: \(settings.geofenceDefaultRadiusMeters)
+          rearmDelayStepper: \(settings.geofenceRearmMinutes)
+        section: Diagnostics
+          enableDiagnosticLoggingToggle: \(settings.loggingEnabled)
+          logVerbosityDropdown: \(settings.loggingVerbosity.displayName)
+        """
+    }
+
     func requestCalendarAccess() async {
         _ = await calendarAccess.requestAccess()
         // Always refresh regardless of granted value: refreshCalendars re-reads
@@ -167,7 +211,9 @@ final class AppViewModel: ObservableObject {
         timeToLeaveTransport: TimeToLeaveTransport,
         geofenceEnabled: Bool,
         geofenceDefaultRadiusMeters: Int,
-        geofenceRearmMinutes: Int
+        geofenceRearmMinutes: Int,
+        loggingEnabled: Bool,
+        loggingVerbosity: AppLogVerbosity
     ) async {
         settings.barrageCount = barrageCount
         settings.barrageIntervalSeconds = barrageIntervalSeconds
@@ -179,6 +225,8 @@ final class AppViewModel: ObservableObject {
         settings.geofenceEnabled = geofenceEnabled
         settings.geofenceDefaultRadiusMeters = geofenceDefaultRadiusMeters
         settings.geofenceRearmMinutes = geofenceRearmMinutes
+        settings.loggingEnabled = loggingEnabled
+        settings.loggingVerbosity = loggingVerbosity
         await scheduleAlarmsIfPossible()
         await refreshTodayAlarms()
     }

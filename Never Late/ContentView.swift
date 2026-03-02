@@ -37,14 +37,7 @@ struct ContentView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    Button {
-                        showAlarmSettings = true
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(NLColors.primary)
-                    .accessibilityLabel("Alarm Settings")
+                    alarmSettingsButton
                 }
                 .padding(.horizontal, NLSpacing.pagePadding)
                 .padding(.bottom, NLSpacing.pagePadding)
@@ -113,6 +106,8 @@ struct ContentView: View {
                     && model.calendarStatus != .denied
                     && model.calendarStatus != .restricted,
                 showSettings: model.calendarStatus == .denied,
+                enableButtonId: "calendarAccessEnableButton",
+                settingsButtonId: "calendarAccessFixInSettingsButton",
                 action: { Task { await model.requestCalendarAccess() } }
             )
             Divider()
@@ -123,6 +118,8 @@ struct ContentView: View {
                 statusColor: notificationStatusColor,
                 showEnable: model.notificationStatus == .notDetermined,
                 showSettings: model.notificationStatus == .denied,
+                enableButtonId: "notificationsEnableButton",
+                settingsButtonId: "notificationsFixInSettingsButton",
                 action: { Task { await model.requestNotificationAccess() } }
             )
             if model.settings.geofenceEnabled {
@@ -134,6 +131,8 @@ struct ContentView: View {
                     statusColor: locationStatusColor,
                     showEnable: model.locationStatus == .notDetermined || model.locationStatus == .authorizedWhenInUse,
                     showSettings: model.locationStatus == .denied,
+                    enableButtonId: "locationAccessEnableButton",
+                    settingsButtonId: "locationAccessFixInSettingsButton",
                     action: { Task { await model.requestLocationAccess() } }
                 )
             }
@@ -147,6 +146,8 @@ struct ContentView: View {
         statusColor: Color,
         showEnable: Bool,
         showSettings: Bool,
+        enableButtonId: String,
+        settingsButtonId: String,
         action: @escaping () -> Void
     ) -> some View {
         HStack(alignment: .center) {
@@ -160,15 +161,9 @@ struct ContentView: View {
             }
             Spacer()
             if showEnable {
-                Button("Enable", action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(NLColors.primary)
-                    .controlSize(.small)
+                permissionEnableButton(id: enableButtonId, action: action)
             } else if showSettings {
-                Button("Fix in Settings") { model.openSettings() }
-                    .buttonStyle(.bordered)
-                    .tint(NLColors.destructive)
-                    .controlSize(.small)
+                permissionFixInSettingsButton(id: settingsButtonId)
             }
         }
     }
@@ -184,20 +179,13 @@ struct ContentView: View {
                     Text("No calendars found. Connect a calendar account in Settings.")
                         .font(NLTypography.body)
                         .foregroundStyle(NLColors.textSecondary)
-                    Button("Open Settings") { model.openSettings() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(NLColors.primary)
+                    calendarOpenSettingsButton
                 } else {
                     if model.settings.selectedCalendarIds.isEmpty {
                         Text(selectionSummaryText)
                             .font(NLTypography.body)
                             .foregroundStyle(NLColors.textSecondary)
-                        Button("Choose Calendars") {
-                            model.openCalendarPicker()
-                            showCalendarPicker = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(NLColors.primary)
+                        chooseCalendarsButton
                     } else {
                         VStack(alignment: .leading, spacing: NLSpacing.compactGap) {
                             ForEach(selectedCalendars, id: \.calendarIdentifier) { calendar in
@@ -211,11 +199,7 @@ struct ContentView: View {
                                 }
                             }
                         }
-                        Button("Change Selection") {
-                            model.openCalendarPicker()
-                            showCalendarPicker = true
-                        }
-                        .buttonStyle(.bordered)
+                        changeCalendarSelectionButton
                         Text("\(selectedCalendarCount) selected")
                             .font(NLTypography.caption)
                             .foregroundStyle(NLColors.textTertiary)
@@ -241,21 +225,8 @@ struct ContentView: View {
                 .foregroundStyle(NLColors.textSecondary)
 
             HStack(spacing: NLSpacing.compactGap) {
-                Button(model.isRefreshing ? "Refreshing…" : "Refresh Alarms") {
-                    guard model.hasCalendarAccess else {
-                        showRefreshError = true
-                        return
-                    }
-                    showRefreshError = false
-                    Task { await model.refreshCalendars() }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(NLColors.primary)
-                .disabled(model.isRefreshing)
-                Button("Upcoming") {
-                    showUpcomingAlarms = true
-                }
-                .buttonStyle(.bordered)
+                refreshAlarmsButton
+                upcomingAlarmsButton
             }
 
             if showRefreshError {
@@ -290,6 +261,83 @@ struct ContentView: View {
     }
 
     // MARK: - Helpers
+
+    private var alarmSettingsButton: some View {
+        Button {
+            showAlarmSettings = true
+        } label: {
+            Image(systemName: "gearshape.fill")
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(NLColors.primary)
+        .accessibilityLabel("Alarm Settings")
+        .accessibilityIdentifier("alarmSettingsButton")
+    }
+
+    private func permissionEnableButton(id: String, action: @escaping () -> Void) -> some View {
+        Button("Enable", action: action)
+            .buttonStyle(.borderedProminent)
+            .tint(NLColors.primary)
+            .controlSize(.small)
+            .accessibilityIdentifier(id)
+    }
+
+    private func permissionFixInSettingsButton(id: String) -> some View {
+        Button("Fix in Settings") { model.openSettings() }
+            .buttonStyle(.bordered)
+            .tint(NLColors.destructive)
+            .controlSize(.small)
+            .accessibilityIdentifier(id)
+    }
+
+    private var calendarOpenSettingsButton: some View {
+        Button("Open Settings") { model.openSettings() }
+            .buttonStyle(.borderedProminent)
+            .tint(NLColors.primary)
+            .accessibilityIdentifier("calendarOpenSettingsButton")
+    }
+
+    private var chooseCalendarsButton: some View {
+        Button("Choose Calendars") {
+            model.openCalendarPicker()
+            showCalendarPicker = true
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(NLColors.primary)
+        .accessibilityIdentifier("chooseCalendarsButton")
+    }
+
+    private var changeCalendarSelectionButton: some View {
+        Button("Change Selection") {
+            model.openCalendarPicker()
+            showCalendarPicker = true
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("changeCalendarSelectionButton")
+    }
+
+    private var refreshAlarmsButton: some View {
+        Button(model.isRefreshing ? "Refreshing…" : "Refresh Alarms") {
+            guard model.hasCalendarAccess else {
+                showRefreshError = true
+                return
+            }
+            showRefreshError = false
+            Task { await model.refreshCalendars() }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(NLColors.primary)
+        .disabled(model.isRefreshing)
+        .accessibilityIdentifier("refreshAlarmsButton")
+    }
+
+    private var upcomingAlarmsButton: some View {
+        Button("Upcoming") {
+            showUpcomingAlarms = true
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("upcomingAlarmsButton")
+    }
 
     private var isFullyConfigured: Bool {
         model.hasCalendarAccess
@@ -471,26 +519,7 @@ private struct CalendarSelectionSheet: View {
                                     }
                                     .padding(.bottom, NLSpacing.tinyGap)
                                     ForEach(group.calendars, id: \.calendarIdentifier) { calendar in
-                                        Toggle(isOn: Binding(
-                                            get: { selection.contains(calendar.calendarIdentifier) },
-                                            set: { isOn in
-                                                if isOn {
-                                                    selection.insert(calendar.calendarIdentifier)
-                                                } else {
-                                                    selection.remove(calendar.calendarIdentifier)
-                                                }
-                                            }
-                                        )) {
-                                            HStack(spacing: NLSpacing.compactGap) {
-                                                Circle()
-                                                    .fill(Color(calendar.cgColor))
-                                                    .frame(width: 10, height: 10)
-                                                Text(calendar.title)
-                                                    .font(NLTypography.body)
-                                                    .foregroundStyle(NLColors.textPrimary)
-                                            }
-                                        }
-                                        .tint(NLColors.primary)
+                                        calendarSelectionToggle(for: calendar)
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -508,16 +537,9 @@ private struct CalendarSelectionSheet: View {
                 HStack(spacing: NLSpacing.compactGap) {
                     Spacer()
                     if isFirstSelection == false {
-                        Button("Cancel") { dismiss() }
-                            .buttonStyle(.bordered)
+                        calendarSelectionCancelButton
                     }
-                    Button("Save") {
-                        Task { await model.applyCalendarSelection(selection) }
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(NLColors.primary)
-                    .disabled(selection.isEmpty)
+                    calendarSelectionSaveButton
                 }
             }
             .padding(NLSpacing.pagePadding)
@@ -526,6 +548,47 @@ private struct CalendarSelectionSheet: View {
         .onAppear {
             selection = model.settings.selectedCalendarIds
         }
+    }
+
+    private func calendarSelectionToggle(for calendar: EKCalendar) -> some View {
+        Toggle(isOn: Binding(
+            get: { selection.contains(calendar.calendarIdentifier) },
+            set: { isOn in
+                if isOn {
+                    selection.insert(calendar.calendarIdentifier)
+                } else {
+                    selection.remove(calendar.calendarIdentifier)
+                }
+            }
+        )) {
+            HStack(spacing: NLSpacing.compactGap) {
+                Circle()
+                    .fill(Color(calendar.cgColor))
+                    .frame(width: 10, height: 10)
+                Text(calendar.title)
+                    .font(NLTypography.body)
+                    .foregroundStyle(NLColors.textPrimary)
+            }
+        }
+        .tint(NLColors.primary)
+        .accessibilityIdentifier("calendarSelectionToggle_\(calendar.calendarIdentifier)")
+    }
+
+    private var calendarSelectionCancelButton: some View {
+        Button("Cancel") { dismiss() }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("calendarSelectionCancelButton")
+    }
+
+    private var calendarSelectionSaveButton: some View {
+        Button("Save") {
+            Task { await model.applyCalendarSelection(selection) }
+            dismiss()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(NLColors.primary)
+        .disabled(selection.isEmpty)
+        .accessibilityIdentifier("calendarSelectionSaveButton")
     }
 }
 
@@ -601,8 +664,7 @@ private struct UpcomingAlarmsSheet: View {
 
                 HStack {
                     Spacer()
-                    Button("Done") { dismiss() }
-                        .buttonStyle(.bordered)
+                    upcomingAlarmsDoneButton
                 }
             }
             .padding(NLSpacing.pagePadding)
@@ -619,6 +681,12 @@ private struct UpcomingAlarmsSheet: View {
         }
         return "Alarm: \(item.detail)"
     }
+
+    private var upcomingAlarmsDoneButton: some View {
+        Button("Done") { dismiss() }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("upcomingAlarmsDoneButton")
+    }
 }
 
 private struct AlarmSettingsSheet: View {
@@ -634,6 +702,8 @@ private struct AlarmSettingsSheet: View {
     @State private var geofenceEnabled = SettingsStore.defaultGeofenceEnabled
     @State private var geofenceDefaultRadiusMeters = SettingsStore.defaultGeofenceDefaultRadiusMeters
     @State private var geofenceRearmMinutes = SettingsStore.defaultGeofenceRearmMinutes
+    @State private var loggingEnabled = SettingsStore.defaultLoggingEnabled
+    @State private var loggingVerbosity = SettingsStore.defaultLoggingVerbosity
 
     var body: some View {
         ZStack {
@@ -652,9 +722,9 @@ private struct AlarmSettingsSheet: View {
                     VStack(alignment: .leading, spacing: NLSpacing.innerGap) {
                         GroupBox {
                             VStack(alignment: .leading, spacing: NLSpacing.compactGap) {
-                                Stepper("Barrage notifications: \(barrageCount)", value: $barrageCount, in: 1...60)
-                                Stepper("Seconds between notifications: \(intervalSeconds)", value: $intervalSeconds, in: 5...120, step: 5)
-                                Stepper("Default snooze (minutes): \(snoozeMinutes)", value: $snoozeMinutes, in: 1...60)
+                                barrageNotificationsStepper
+                                secondsBetweenNotificationsStepper
+                                defaultSnoozeMinutesStepper
                             }
                             .font(NLTypography.body)
                             .foregroundStyle(NLColors.textPrimary)
@@ -668,26 +738,11 @@ private struct AlarmSettingsSheet: View {
 
                         GroupBox {
                             VStack(alignment: .leading, spacing: NLSpacing.compactGap) {
-                                Toggle("Enable time-to-leave alarms", isOn: $timeToLeaveEnabled)
+                                enableTimeToLeaveAlarmsToggle
                                 if timeToLeaveEnabled {
-                                    Stepper(
-                                        "Prep buffer before leaving:\n\(timeToLeavePrepMinutes) min",
-                                        value: $timeToLeavePrepMinutes,
-                                        in: 0...60,
-                                        step: 5
-                                    )
-                                    Stepper(
-                                        "Fallback lead time:\n\(timeToLeaveFallbackMinutes) min",
-                                        value: $timeToLeaveFallbackMinutes,
-                                        in: 5...180,
-                                        step: 5
-                                    )
-                                    Picker("Travel mode", selection: $timeToLeaveTransport) {
-                                        ForEach(TimeToLeaveTransport.allCases) { mode in
-                                            Text(mode.title).tag(mode)
-                                        }
-                                    }
-                                    .pickerStyle(.segmented)
+                                    prepBufferBeforeLeavingStepper
+                                    fallbackLeadTimeStepper
+                                    travelModeDropdown
                                 }
                             }
                             .font(NLTypography.body)
@@ -702,19 +757,10 @@ private struct AlarmSettingsSheet: View {
 
                         GroupBox {
                             VStack(alignment: .leading, spacing: NLSpacing.compactGap) {
-                                Toggle("Enable location enter/leave alarms", isOn: $geofenceEnabled)
+                                enableLocationEnterLeaveAlarmsToggle
                                 if geofenceEnabled {
-                                    Stepper(
-                                        "Default geofence radius: \(geofenceDefaultRadiusMeters) m",
-                                        value: $geofenceDefaultRadiusMeters,
-                                        in: 100...1000,
-                                        step: 50
-                                    )
-                                    Stepper(
-                                        "Re-arm delay: \(geofenceRearmMinutes) min",
-                                        value: $geofenceRearmMinutes,
-                                        in: 1...60
-                                    )
+                                    defaultGeofenceRadiusStepper
+                                    rearmDelayStepper
                                     Text("Ignore additional crossings until this delay expires.")
                                         .font(NLTypography.caption)
                                         .foregroundStyle(NLColors.textSecondary)
@@ -729,32 +775,33 @@ private struct AlarmSettingsSheet: View {
                                 .tracking(NLTypography.sectionHeaderTracking)
                                 .foregroundStyle(NLColors.primary)
                         }
+
+                        GroupBox {
+                            VStack(alignment: .leading, spacing: NLSpacing.compactGap) {
+                                enableDiagnosticLoggingToggle
+                                logVerbosityDropdown
+                                if AppLog.buildAllowsDiagnostics == false {
+                                    Text("This build disables diagnostic logging.")
+                                        .font(NLTypography.caption)
+                                        .foregroundStyle(NLColors.textSecondary)
+                                }
+                            }
+                            .font(NLTypography.body)
+                            .foregroundStyle(NLColors.textPrimary)
+                            .padding(.vertical, NLSpacing.tinyGap)
+                        } label: {
+                            Text("DIAGNOSTICS")
+                                .font(NLTypography.sectionHeader)
+                                .tracking(NLTypography.sectionHeaderTracking)
+                                .foregroundStyle(NLColors.primary)
+                        }
                     }
                 }
 
                 HStack(spacing: NLSpacing.compactGap) {
                     Spacer()
-                    Button("Cancel") { dismiss() }
-                        .buttonStyle(.bordered)
-                    Button("Save") {
-                        Task {
-                            await model.updateAlarmBehavior(
-                                barrageCount: barrageCount,
-                                barrageIntervalSeconds: intervalSeconds,
-                                snoozeMinutes: snoozeMinutes,
-                                timeToLeaveEnabled: timeToLeaveEnabled,
-                                timeToLeavePrepMinutes: timeToLeavePrepMinutes,
-                                timeToLeaveFallbackMinutes: timeToLeaveFallbackMinutes,
-                                timeToLeaveTransport: timeToLeaveTransport,
-                                geofenceEnabled: geofenceEnabled,
-                                geofenceDefaultRadiusMeters: geofenceDefaultRadiusMeters,
-                                geofenceRearmMinutes: geofenceRearmMinutes
-                            )
-                        }
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(NLColors.primary)
+                    cancelSettingsButton
+                    saveSettingsButton
                 }
             }
             .padding(NLSpacing.pagePadding)
@@ -771,7 +818,130 @@ private struct AlarmSettingsSheet: View {
             geofenceEnabled = model.settings.geofenceEnabled
             geofenceDefaultRadiusMeters = model.settings.geofenceDefaultRadiusMeters
             geofenceRearmMinutes = model.settings.geofenceRearmMinutes
+            loggingEnabled = model.settings.loggingEnabled
+            loggingVerbosity = model.settings.loggingVerbosity
         }
+    }
+
+    private var barrageNotificationsStepper: some View {
+        Stepper("Barrage notifications: \(barrageCount)", value: $barrageCount, in: 1...60)
+            .accessibilityIdentifier("barrageNotificationsStepper")
+    }
+
+    private var secondsBetweenNotificationsStepper: some View {
+        Stepper("Seconds between notifications: \(intervalSeconds)", value: $intervalSeconds, in: 5...120, step: 5)
+            .accessibilityIdentifier("secondsBetweenNotificationsStepper")
+    }
+
+    private var defaultSnoozeMinutesStepper: some View {
+        Stepper("Default snooze (minutes): \(snoozeMinutes)", value: $snoozeMinutes, in: 1...60)
+            .accessibilityIdentifier("defaultSnoozeMinutesStepper")
+    }
+
+    private var enableTimeToLeaveAlarmsToggle: some View {
+        Toggle("Enable time-to-leave alarms", isOn: $timeToLeaveEnabled)
+            .accessibilityIdentifier("enableTimeToLeaveAlarmsToggle")
+    }
+
+    private var prepBufferBeforeLeavingStepper: some View {
+        Stepper(
+            "Prep buffer before leaving:\n\(timeToLeavePrepMinutes) min",
+            value: $timeToLeavePrepMinutes,
+            in: 0...60,
+            step: 5
+        )
+        .accessibilityIdentifier("prepBufferBeforeLeavingStepper")
+    }
+
+    private var fallbackLeadTimeStepper: some View {
+        Stepper(
+            "Fallback lead time:\n\(timeToLeaveFallbackMinutes) min",
+            value: $timeToLeaveFallbackMinutes,
+            in: 5...180,
+            step: 5
+        )
+        .accessibilityIdentifier("fallbackLeadTimeStepper")
+    }
+
+    private var travelModeDropdown: some View {
+        Picker("Travel mode", selection: $timeToLeaveTransport) {
+            ForEach(TimeToLeaveTransport.allCases) { mode in
+                Text(mode.title).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("travelModeDropdown")
+    }
+
+    private var enableLocationEnterLeaveAlarmsToggle: some View {
+        Toggle("Enable location enter/leave alarms", isOn: $geofenceEnabled)
+            .accessibilityIdentifier("enableLocationEnterLeaveAlarmsToggle")
+    }
+
+    private var defaultGeofenceRadiusStepper: some View {
+        Stepper(
+            "Default geofence radius: \(geofenceDefaultRadiusMeters) m",
+            value: $geofenceDefaultRadiusMeters,
+            in: 100...1000,
+            step: 50
+        )
+        .accessibilityIdentifier("defaultGeofenceRadiusStepper")
+    }
+
+    private var rearmDelayStepper: some View {
+        Stepper(
+            "Re-arm delay: \(geofenceRearmMinutes) min",
+            value: $geofenceRearmMinutes,
+            in: 1...60
+        )
+        .accessibilityIdentifier("rearmDelayStepper")
+    }
+
+    private var enableDiagnosticLoggingToggle: some View {
+        Toggle("Enable diagnostic logging", isOn: $loggingEnabled)
+            .disabled(AppLog.buildAllowsDiagnostics == false)
+            .accessibilityIdentifier("enableDiagnosticLoggingToggle")
+    }
+
+    private var logVerbosityDropdown: some View {
+        Picker("Log verbosity", selection: $loggingVerbosity) {
+            ForEach(AppLogVerbosity.allCases) { value in
+                Text(value.displayName).tag(value)
+            }
+        }
+        .disabled(AppLog.buildAllowsDiagnostics == false || loggingEnabled == false)
+        .accessibilityIdentifier("logVerbosityDropdown")
+    }
+
+    private var cancelSettingsButton: some View {
+        Button("Cancel") { dismiss() }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("alarmSettingsCancelButton")
+    }
+
+    private var saveSettingsButton: some View {
+        Button("Save") {
+            Task {
+                await model.updateAlarmBehavior(
+                    barrageCount: barrageCount,
+                    barrageIntervalSeconds: intervalSeconds,
+                    snoozeMinutes: snoozeMinutes,
+                    timeToLeaveEnabled: timeToLeaveEnabled,
+                    timeToLeavePrepMinutes: timeToLeavePrepMinutes,
+                    timeToLeaveFallbackMinutes: timeToLeaveFallbackMinutes,
+                    timeToLeaveTransport: timeToLeaveTransport,
+                    geofenceEnabled: geofenceEnabled,
+                    geofenceDefaultRadiusMeters: geofenceDefaultRadiusMeters,
+                    geofenceRearmMinutes: geofenceRearmMinutes,
+                    loggingEnabled: loggingEnabled,
+                    loggingVerbosity: loggingVerbosity
+                )
+            }
+            dismiss()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(NLColors.primary)
+        .accessibilityIdentifier("alarmSettingsSaveButton")
     }
 }
 

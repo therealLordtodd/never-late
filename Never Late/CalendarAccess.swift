@@ -39,14 +39,14 @@ final class CalendarAccess {
             do {
                 return try await eventStore.requestFullAccessToEvents()
             } catch {
-                AppLog.app.error("Calendar access request failed: \(error.localizedDescription, privacy: .public)")
+                AppLog.app.error("Calendar access request failed: \(error.localizedDescription)")
                 return false
             }
         } else {
             return await withCheckedContinuation { continuation in
                 eventStore.requestAccess(to: .event) { granted, error in
                     if let error {
-                        AppLog.app.error("Calendar access request failed: \(error.localizedDescription, privacy: .public)")
+                        AppLog.app.error("Calendar access request failed: \(error.localizedDescription)")
                     }
                     continuation.resume(returning: granted)
                 }
@@ -103,19 +103,19 @@ final class CalendarAccess {
         alarms: [EKAlarm],
         now: Date
     ) -> AlarmCandidate? {
-        // If an event has any proximity alarms, treat it as a geofence alarm event.
-        // We still keep only one app alarm per event.
-        let proximityCandidates = alarms
-            .filter { $0.proximity != .none }
-            .compactMap { alarmCandidate(for: $0, event: event, now: now) }
-        if let selected = proximityCandidates.min(by: { $0.fireDate < $1.fireDate }) {
-            return selected
-        }
-
         let nonProximityCandidates = alarms
             .filter { $0.proximity == .none }
             .compactMap { alarmCandidate(for: $0, event: event, now: now) }
-        return nonProximityCandidates.min(by: { $0.fireDate < $1.fireDate })
+        if let selected = nonProximityCandidates.min(by: { $0.fireDate < $1.fireDate }) {
+            return selected
+        }
+
+        // Fall back to proximity alarms only when there is no timed alarm candidate.
+        // This keeps time-based reminders reliable while still supporting geofence-only alarms.
+        let proximityCandidates = alarms
+            .filter { $0.proximity != .none }
+            .compactMap { alarmCandidate(for: $0, event: event, now: now) }
+        return proximityCandidates.min(by: { $0.fireDate < $1.fireDate })
     }
 
     private func alarmCandidate(
@@ -254,7 +254,7 @@ final class CalendarAccess {
             mapItem.name = location
             return mapItem
         } catch {
-            AppLog.app.warning("Failed to geocode event location: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.warning("Failed to geocode event location: \(error.localizedDescription)")
             return nil
         }
     }
@@ -274,7 +274,7 @@ final class CalendarAccess {
             let eta = try await calculateETA(for: request)
             return eta.expectedDepartureDate
         } catch {
-            AppLog.app.warning("Failed to estimate travel time: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.warning("Failed to estimate travel time: \(error.localizedDescription)")
             return nil
         }
     }

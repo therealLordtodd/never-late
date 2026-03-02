@@ -25,6 +25,8 @@ These rules apply to Never Late (SwiftUI on iOS).
 ## Logging (AppLog)
 
 Use `AppLog` only. Never use `print()`.
+Logging can be toggled at runtime in Settings → Diagnostics.
+Build-level gating uses `Info.plist` key `NLAllowDiagnosticLogging`.
 
 Categories:
 - `AppLog.app`

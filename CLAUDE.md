@@ -39,6 +39,7 @@ Calendaring app with persistent alarms
 
 ### Code Quality
 - Use **`AppLog`** for all logging — never `print()`
+- Keep logging behind `AppLog` and Diagnostics settings; respect build gate `NLAllowDiagnosticLogging`
 - **Soft delete only** — never hard-delete rows from the database
 - **All mutations** go through the mutation logging system
 - **Build** the project before handing off work: `xcodebuild -project "/Users/todd/Documents/Programming/Never Late/Never Late.xcodeproj" -scheme "Never Late" -configuration Debug -destination "platform=iOS Simulator,id=D6A7D96D-9D68-4737-B244-D2F3EFB1E1A8"`
@@ -48,6 +49,7 @@ Calendaring app with persistent alarms
 - **Never use raw font modifiers** — always use `NLTypography` tokens
 - **Never use raw spacing values** — always use `NLSpacing` tokens
 - **Every button** has an explicit button style — no unstyled buttons
+- **Name every interactive control as a computed property** using the UI element suffix rules in `AGENTS.md`
 
 ---
 

@@ -235,3 +235,36 @@ If a screen uses split layout, use platform-native split components. Do not fake
 ### Rules
 1. **Always use the environment dismiss mechanism** — never set a boolean directly.
 2. **Call dismiss** after both cancel and successful save/action.
+
+---
+
+## 16. UI Element Naming Standards
+
+### The Rule
+
+Every interactive UI element that a user touches is a **named computed property** on the View. Anonymous inline controls are prohibited for any element that:
+- Has a meaningful label or purpose
+- May need to be discussed, debugged, or referenced
+- Holds or displays state
+
+### Pattern
+```swift
+// MARK: - Alarms
+
+private var alarmNameTextField: some View {
+    TextField("Alarm name...", text: $alarmName)
+        .textFieldStyle(.roundedBorder)
+}
+
+private var alarmRepeatDropdown: some View {
+    Picker("Repeat", selection: $selectedRepeat) {
+        ForEach(RepeatOption.allCases) { Text($0.label).tag($0) }
+    }
+    .labelsHidden()
+}
+```
+
+### Canonical Suffix List
+`TextField` · `TextEditor` · `SearchField` · `Dropdown` · `Toggle` · `DatePicker` · `Stepper` · `Slider` · `Button` · `Table` · `List` · `Tab` · `Segment`
+
+See `AGENTS.md` for the full naming rule set and the `uiElementContext` ViewModel pattern.

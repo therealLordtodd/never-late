@@ -43,6 +43,8 @@ enum SettingsKeys {
     static let geofenceEnabled = "geofenceEnabled"
     static let geofenceDefaultRadiusMeters = "geofenceDefaultRadiusMeters"
     static let geofenceRearmMinutes = "geofenceRearmMinutes"
+    static let loggingEnabled = "loggingEnabled"
+    static let loggingVerbosity = "loggingVerbosity"
     static let snoozedUntil = "snoozedUntil"
 }
 
@@ -111,6 +113,20 @@ final class SettingsStore: ObservableObject {
     static let defaultGeofenceEnabled = true
     static let defaultGeofenceDefaultRadiusMeters = 200
     static let defaultGeofenceRearmMinutes = 5
+    static let defaultLoggingEnabled: Bool = {
+#if DEBUG
+        true
+#else
+        false
+#endif
+    }()
+    static let defaultLoggingVerbosity: AppLogVerbosity = {
+#if DEBUG
+        .verbose
+#else
+        .warnings
+#endif
+    }()
 
     @Published var selectedCalendarIds: Set<String> {
         didSet {
@@ -172,6 +188,18 @@ final class SettingsStore: ObservableObject {
             save()
         }
     }
+    @Published var loggingEnabled: Bool {
+        didSet {
+            save()
+            applyLoggingConfiguration()
+        }
+    }
+    @Published var loggingVerbosityRaw: String {
+        didSet {
+            save()
+            applyLoggingConfiguration()
+        }
+    }
     var snoozedUntil: Date? {
         didSet {
             save()
@@ -181,6 +209,11 @@ final class SettingsStore: ObservableObject {
     var timeToLeaveTransport: TimeToLeaveTransport {
         get { TimeToLeaveTransport(rawValue: timeToLeaveTransportRaw) ?? Self.defaultTimeToLeaveTransport }
         set { timeToLeaveTransportRaw = newValue.rawValue }
+    }
+
+    var loggingVerbosity: AppLogVerbosity {
+        get { AppLogVerbosity(rawValue: loggingVerbosityRaw) ?? Self.defaultLoggingVerbosity }
+        set { loggingVerbosityRaw = newValue.rawValue }
     }
 
     private init() {
@@ -222,7 +255,15 @@ final class SettingsStore: ObservableObject {
         geofenceDefaultRadiusMeters = geofenceRadius > 0 ? geofenceRadius : Self.defaultGeofenceDefaultRadiusMeters
         let geofenceMinutes = UserDefaults.standard.integer(forKey: SettingsKeys.geofenceRearmMinutes)
         geofenceRearmMinutes = geofenceMinutes > 0 ? geofenceMinutes : Self.defaultGeofenceRearmMinutes
+        if UserDefaults.standard.object(forKey: SettingsKeys.loggingEnabled) != nil {
+            loggingEnabled = UserDefaults.standard.bool(forKey: SettingsKeys.loggingEnabled)
+        } else {
+            loggingEnabled = Self.defaultLoggingEnabled
+        }
+        loggingVerbosityRaw = UserDefaults.standard.string(forKey: SettingsKeys.loggingVerbosity)
+            ?? Self.defaultLoggingVerbosity.rawValue
         snoozedUntil = UserDefaults.standard.object(forKey: SettingsKeys.snoozedUntil) as? Date
+        applyLoggingConfiguration()
     }
 
     private func save() {
@@ -238,6 +279,12 @@ final class SettingsStore: ObservableObject {
         UserDefaults.standard.set(geofenceEnabled, forKey: SettingsKeys.geofenceEnabled)
         UserDefaults.standard.set(geofenceDefaultRadiusMeters, forKey: SettingsKeys.geofenceDefaultRadiusMeters)
         UserDefaults.standard.set(geofenceRearmMinutes, forKey: SettingsKeys.geofenceRearmMinutes)
+        UserDefaults.standard.set(loggingEnabled, forKey: SettingsKeys.loggingEnabled)
+        UserDefaults.standard.set(loggingVerbosityRaw, forKey: SettingsKeys.loggingVerbosity)
         UserDefaults.standard.set(snoozedUntil, forKey: SettingsKeys.snoozedUntil)
+    }
+
+    private func applyLoggingConfiguration() {
+        AppLog.configure(enabled: loggingEnabled, verbosity: loggingVerbosity)
     }
 }

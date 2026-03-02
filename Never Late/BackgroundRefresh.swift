@@ -42,7 +42,7 @@ final class BackgroundRefreshScheduler {
             try BGTaskScheduler.shared.submit(request)
             AppLog.app.info("Background refresh scheduled")
         } catch {
-            AppLog.app.error("Failed to schedule background refresh: \(error.localizedDescription, privacy: .public)")
+            AppLog.app.error("Failed to schedule background refresh: \(error.localizedDescription)")
         }
     }
 }

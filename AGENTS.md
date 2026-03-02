@@ -142,6 +142,11 @@ Before handing off any implementation work, build the project and report the res
 
 All logging must use the project's centralized logging facade (`AppLog`). Never use `print()` or raw logging APIs.
 
+Runtime controls exist in the app settings under **Diagnostics**.
+Build-time control uses `Info.plist` key `NLAllowDiagnosticLogging`:
+- `true` = allow diagnostics in this build
+- `false` = force logging off regardless of runtime toggle
+
 **Categories:**
 
 | Logger | Use for |
@@ -164,7 +169,7 @@ All logging must use the project's centralized logging facade (`AppLog`). Never 
 AppLog.db.info("Fetching records.")
 do {
     let result = try await fetch()
-    AppLog.db.info("Fetched records.", metadata: ["count": result.count])
+    AppLog.db.info("Fetched records.", metadata: ["count": "\(result.count)"])
 } catch {
     AppLog.db.error("Failed to fetch.", metadata: ["error": error.localizedDescription])
 }
@@ -219,6 +224,70 @@ Before any UI work, read:
 3. `Style Guide/platform-notes/Apple Apps.md` — If building for Apple platforms.
 
 Never Late is currently iOS-only. Ignore Windows platform guidance unless project scope changes.
+
+---
+
+## UI Element Naming Convention
+
+This is a first-class rule. Follow it in every View and ViewModel.
+
+### The Pattern
+
+Every interactive element the user touches is a **named computed property** on the View (not anonymous inline):
+
+```swift
+// WRONG — anonymous, ungrepable
+Toggle("Enable alerts", isOn: $alertsEnabled)
+
+// RIGHT — named, grep-able, referable in natural language
+private var alertsEnabledToggle: some View {
+    Toggle("Enable alerts", isOn: $alertsEnabled)
+}
+```
+
+### Canonical Element Type Suffixes
+
+| Suffix | Control | Natural Language Example |
+|--------|---------|--------------------------|
+| `TextField` | Single-line text input | "the alarm name text field" |
+| `TextEditor` | Multi-line text input | "the notes text editor" |
+| `SearchField` | Text input used as search/filter | "the alarm search field" |
+| `Dropdown` | Picker with discrete options | "the repeat interval dropdown" |
+| `Toggle` | Boolean toggle | "the alerts enabled toggle" |
+| `DatePicker` | Date/time picker | "the alarm time date picker" |
+| `Stepper` | Numeric stepper | "the snooze count stepper" |
+| `Slider` | Numeric slider | "the volume slider" |
+| `Button` | Named button (when stored as var) | "the save alarm button" |
+| `Table` | Data table | "the alarms table" |
+| `List` | Scrollable list | "the alarms list" |
+| `Tab` | Tab/segment control | "the active tab" |
+| `Segment` | Segmented control (alias) | — |
+
+### Naming Rules
+
+1. **No abbreviations.** `alarmNameTextField` not `alarmNameTF`.
+2. **camelCase.** Data object first, then property, then element type.
+3. **Context prefix** when the same type appears in multiple sections: `headerAlarmSearchField` vs `listAlarmSearchField`.
+4. **Elements group under `// MARK: -` sections** naming their screen section — this is how the AI locates elements by natural language.
+5. **Every ViewModel** exposes a `uiElementContext: String` computed property listing interactive elements and their current values.
+
+### `uiElementContext` Pattern
+
+```swift
+var uiElementContext: String {
+    """
+    screen: Alarm Detail
+    section: Header
+      alarmNameTextField: "\(alarmName)"
+    section: Schedule
+      alarmTimeDatePicker: "\(formattedTime)"
+      repeatIntervalDropdown: "\(repeatInterval.label)"
+      alertsEnabledToggle: \(alertsEnabled)
+    section: Snooze
+      snoozeCountStepper: \(snoozeCount)
+    """
+}
+```
 
 ---
 

@@ -19,6 +19,8 @@ final class CalendarAccess {
     private let eventStore = EKEventStore()
     private let maxTimeToLeaveCandidates = 12
     private let proximityFallbackLeadSeconds: TimeInterval = 5
+    private let missedAlarmGraceSeconds: TimeInterval = 90
+    private let midnightCarrySeconds: TimeInterval = 60 * 60
 
     private struct AlarmCandidate {
         let alarm: EKAlarm?
@@ -98,6 +100,11 @@ final class CalendarAccess {
         return results
     }
 
+    /// Design choice: one alarm per event.
+    /// We pick the earliest future alarm to keep the notification count low (iOS caps at 64 pending)
+    /// and avoid duplicate barrage noise. The persistent barrage targets only the single nearest alarm
+    /// across all events. If a user sets multiple reminders on one event (e.g. 30 min + 5 min before),
+    /// only the earliest fires. Revisit if users report wanting per-alarm granularity.
     private func firstFutureAlarmCandidate(
         for event: EKEvent,
         alarms: [EKAlarm],
@@ -133,13 +140,47 @@ final class CalendarAccess {
         }
 
         if let absoluteDate = alarm.absoluteDate {
-            guard absoluteDate > now else { return nil }
-            return AlarmCandidate(alarm: alarm, fireDate: absoluteDate, detail: "calendar alarm")
+            let detail = standardNoticeDetail(leadSeconds: event.startDate.timeIntervalSince(absoluteDate))
+            if absoluteDate > now {
+                return AlarmCandidate(alarm: alarm, fireDate: absoluteDate, detail: detail)
+            }
+            if shouldScheduleMissedAlarm(fireDate: absoluteDate, now: now) {
+                return AlarmCandidate(
+                    alarm: alarm,
+                    fireDate: now.addingTimeInterval(2),
+                    detail: detail
+                )
+            }
+            return nil
         }
 
+        let leadSeconds = -alarm.relativeOffset
+        let detail = standardNoticeDetail(leadSeconds: leadSeconds)
         let fireDate = event.startDate.addingTimeInterval(alarm.relativeOffset)
-        guard fireDate > now else { return nil }
-        return AlarmCandidate(alarm: alarm, fireDate: fireDate, detail: "calendar alarm")
+        if fireDate <= now {
+            guard shouldScheduleMissedAlarm(fireDate: fireDate, now: now) else { return nil }
+            return AlarmCandidate(
+                alarm: alarm,
+                fireDate: now.addingTimeInterval(2),
+                detail: detail
+            )
+        }
+        return AlarmCandidate(alarm: alarm, fireDate: fireDate, detail: detail)
+    }
+
+    private func shouldScheduleMissedAlarm(fireDate: Date, now: Date) -> Bool {
+        if now.timeIntervalSince(fireDate) <= missedAlarmGraceSeconds {
+            return true
+        }
+
+        // Midnight carry window:
+        // If the app sees an alarm late due to sync lag, keep alarms that fired
+        // between 12:00 AM and 1:00 AM eligible until 1:00 AM local time.
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: now)
+        let carryWindowEnd = startOfToday.addingTimeInterval(midnightCarrySeconds)
+        guard now < carryWindowEnd else { return false }
+        return fireDate >= startOfToday && fireDate < carryWindowEnd && fireDate <= now
     }
 
     private func proximityFallbackFireDate(for event: EKEvent, now: Date) -> Date? {
@@ -150,6 +191,33 @@ final class CalendarAccess {
             return now.addingTimeInterval(proximityFallbackLeadSeconds)
         }
         return nil
+    }
+
+    private func standardNoticeDetail(leadSeconds: TimeInterval) -> String {
+        let lead = Int(leadSeconds.rounded())
+        if lead <= 0 {
+            return "standard notice, at the event time"
+        }
+        let minutes = lead / 60
+        let hours = minutes / 60
+        let days = hours / 24
+        if days >= 1 {
+            return days == 1
+                ? "standard notice, 1 day before event"
+                : "standard notice, \(days) days before event"
+        }
+        if hours >= 1 {
+            let remainingMinutes = minutes - (hours * 60)
+            if remainingMinutes > 0 {
+                return "standard notice, \(hours) hr \(remainingMinutes) min before event"
+            }
+            return hours == 1
+                ? "standard notice, 1 hour before event"
+                : "standard notice, \(hours) hours before event"
+        }
+        return minutes == 1
+            ? "standard notice, 1 min before event"
+            : "standard notice, \(minutes) mins before event"
     }
 
     private func proximityDetail(_ proximity: EKAlarmProximity) -> String {

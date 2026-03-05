@@ -27,6 +27,9 @@ final class AppViewModel: ObservableObject {
     private let calendarAccess = CalendarAccess()
     private let scheduler = NotificationScheduler()
     private let geofenceMonitor = GeofenceAlarmMonitor.shared
+    private let alarmLookaheadDays = 30
+    private var isRecalculatingAlarms = false
+    private var needsRecalculateAfterCurrent = false
 
     init() {
         calendarStatus = calendarAccess.authorizationStatus()
@@ -159,9 +162,11 @@ final class AppViewModel: ObservableObject {
             }
             if settings.selectedCalendarIds.isEmpty {
                 shouldShowCalendarPicker = true
+                upcomingAlarms = []
+                todayAlarms = []
+            } else {
+                await recalculateAndScheduleAlarms()
             }
-            await scheduleAlarmsIfPossible()
-            await refreshTodayAlarms()
         } else {
             shouldShowCalendarPicker = false
             upcomingAlarms = []
@@ -179,13 +184,13 @@ final class AppViewModel: ObservableObject {
         }
         settings.didChooseCalendars = true
         BackgroundRefreshScheduler.shared.schedule()
-        await scheduleAlarmsIfPossible()
+        await recalculateAndScheduleAlarms()
     }
 
     func confirmCalendarSelection() async {
         settings.didChooseCalendars = true
         shouldShowCalendarPicker = false
-        await scheduleAlarmsIfPossible()
+        await recalculateAndScheduleAlarms()
     }
 
     func applyCalendarSelection(_ selection: Set<String>) async {
@@ -193,8 +198,7 @@ final class AppViewModel: ObservableObject {
         settings.didChooseCalendars = true
         shouldShowCalendarPicker = false
         BackgroundRefreshScheduler.shared.schedule()
-        await scheduleAlarmsIfPossible()
-        await refreshTodayAlarms()
+        await recalculateAndScheduleAlarms()
     }
 
     func openCalendarPicker() {
@@ -215,20 +219,21 @@ final class AppViewModel: ObservableObject {
         loggingEnabled: Bool,
         loggingVerbosity: AppLogVerbosity
     ) async {
-        settings.barrageCount = barrageCount
-        settings.barrageIntervalSeconds = barrageIntervalSeconds
-        settings.snoozeMinutes = snoozeMinutes
-        settings.timeToLeaveEnabled = timeToLeaveEnabled
-        settings.timeToLeavePrepMinutes = timeToLeavePrepMinutes
-        settings.timeToLeaveFallbackMinutes = timeToLeaveFallbackMinutes
-        settings.timeToLeaveTransport = timeToLeaveTransport
-        settings.geofenceEnabled = geofenceEnabled
-        settings.geofenceDefaultRadiusMeters = geofenceDefaultRadiusMeters
-        settings.geofenceRearmMinutes = geofenceRearmMinutes
-        settings.loggingEnabled = loggingEnabled
-        settings.loggingVerbosity = loggingVerbosity
-        await scheduleAlarmsIfPossible()
-        await refreshTodayAlarms()
+        settings.batchUpdate {
+            settings.barrageCount = barrageCount
+            settings.barrageIntervalSeconds = barrageIntervalSeconds
+            settings.snoozeMinutes = snoozeMinutes
+            settings.timeToLeaveEnabled = timeToLeaveEnabled
+            settings.timeToLeavePrepMinutes = timeToLeavePrepMinutes
+            settings.timeToLeaveFallbackMinutes = timeToLeaveFallbackMinutes
+            settings.timeToLeaveTransport = timeToLeaveTransport
+            settings.geofenceEnabled = geofenceEnabled
+            settings.geofenceDefaultRadiusMeters = geofenceDefaultRadiusMeters
+            settings.geofenceRearmMinutes = geofenceRearmMinutes
+            settings.loggingEnabled = loggingEnabled
+            settings.loggingVerbosity = loggingVerbosity
+        }
+        await recalculateAndScheduleAlarms()
     }
 
     func openSettings() {
@@ -237,59 +242,97 @@ final class AppViewModel: ObservableObject {
     }
 
     private func scheduleAlarmsIfPossible() async {
-        let calStatus = calendarAccess.authorizationStatus()
-        guard CalendarAccess.hasReadAccess(calStatus) else {
-            upcomingAlarms = []
-            todayAlarms = []
-            return
-        }
-        let notifStatus = await scheduler.authorizationStatus()
-        guard notifStatus == .authorized || notifStatus == .provisional else {
-            upcomingAlarms = []
-            todayAlarms = []
-            return
-        }
-
-        let selectedCalendars = calendars.filter { settings.selectedCalendarIds.contains($0.calendarIdentifier) }
-        guard selectedCalendars.isEmpty == false else {
-            upcomingAlarms = []
-            todayAlarms = []
-            return
-        }
-        let now = Date()
-        let end = Calendar.current.date(byAdding: .day, value: 30, to: now) ?? now.addingTimeInterval(30 * 24 * 60 * 60)
-        let events = calendarAccess.events(from: now, to: end, in: selectedCalendars)
-        let alarms = await calendarAccess.alarms(for: events, now: now, behavior: currentBehaviorSnapshot())
-        upcomingAlarms = alarms.sorted { $0.fireDate < $1.fireDate }
-
-        await scheduler.schedule(alarms: upcomingAlarms)
+        await recalculateAndScheduleAlarms()
     }
 
     func refreshTodayAlarms() async {
+        if upcomingAlarms.isEmpty == false {
+            let now = Date()
+            todayAlarms = filterTodayAlarms(from: upcomingAlarms, now: now)
+            return
+        }
+        await recalculateAndScheduleAlarms()
+    }
+
+    private func recalculateAndScheduleAlarms() async {
+        if isRecalculatingAlarms {
+            needsRecalculateAfterCurrent = true
+            AppLog.app.info("Alarm recalculation already in progress; queued another pass.")
+            return
+        }
+        isRecalculatingAlarms = true
+        needsRecalculateAfterCurrent = false
+        defer {
+            isRecalculatingAlarms = false
+            if needsRecalculateAfterCurrent {
+                needsRecalculateAfterCurrent = false
+                Task { [weak self] in
+                    await self?.recalculateAndScheduleAlarms()
+                }
+            }
+        }
+
         let calStatus = calendarAccess.authorizationStatus()
         guard CalendarAccess.hasReadAccess(calStatus) else {
+            AppLog.app.warning("Skipping alarm schedule: calendar access missing.")
+            upcomingAlarms = []
             todayAlarms = []
             return
         }
         let notifStatus = await scheduler.authorizationStatus()
         guard notifStatus == .authorized || notifStatus == .provisional else {
+            AppLog.app.warning("Skipping alarm schedule: notifications not authorized.")
+            upcomingAlarms = []
             todayAlarms = []
             return
         }
         let selectedCalendars = calendars.filter { settings.selectedCalendarIds.contains($0.calendarIdentifier) }
         guard selectedCalendars.isEmpty == false else {
+            AppLog.app.warning("Skipping alarm schedule: no calendars selected.")
+            upcomingAlarms = []
             todayAlarms = []
             return
         }
+
         let now = Date()
-        let calendar = Calendar.current
-        let end = calendar.date(byAdding: .day, value: 30, to: now) ?? now.addingTimeInterval(30 * 24 * 60 * 60)
+        let end = Calendar.current.date(byAdding: .day, value: alarmLookaheadDays, to: now)
+            ?? now.addingTimeInterval(TimeInterval(alarmLookaheadDays * 24 * 60 * 60))
         let events = calendarAccess.events(from: now, to: end, in: selectedCalendars)
         let alarms = await calendarAccess.alarms(for: events, now: now, behavior: currentBehaviorSnapshot())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
-        todayAlarms = alarms
-            .filter { $0.fireDate < endOfDay }
+        let sorted = alarms.sorted { $0.fireDate < $1.fireDate }
+        upcomingAlarms = sorted
+        todayAlarms = filterTodayAlarms(from: sorted, now: now)
+        let todayWindowEnd = operationalTodayWindowEnd(for: now)
+        let nextAlarm = sorted.first?.fireDate
+        let nextAlarmText = nextAlarm?.formatted(date: .abbreviated, time: .standard) ?? "none"
+        let nextAlarmInSeconds = nextAlarm.map { Int($0.timeIntervalSince(now)) } ?? -1
+        AppLog.app.info(
+            "Calculated alarms for scheduling.",
+            metadata: [
+                "calendarCount": "\(selectedCalendars.count)",
+                "eventCount": "\(events.count)",
+                "alarmCount": "\(sorted.count)",
+                "todayAlarmCount": "\(todayAlarms.count)",
+                "todayWindowEnd": todayWindowEnd.formatted(date: .abbreviated, time: .standard),
+                "nextAlarmAt": nextAlarmText,
+                "nextAlarmInSeconds": "\(nextAlarmInSeconds)"
+            ]
+        )
+        await scheduler.schedule(alarms: sorted)
+    }
+
+    private func filterTodayAlarms(from alarms: [CalendarEventAlarm], now: Date) -> [CalendarEventAlarm] {
+        let endOfWindow = operationalTodayWindowEnd(for: now)
+        return alarms
+            .filter { $0.fireDate >= now && $0.fireDate < endOfWindow }
             .sorted { $0.fireDate < $1.fireDate }
+    }
+
+    private func operationalTodayWindowEnd(for now: Date) -> Date {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: now)
+        return calendar.date(byAdding: .hour, value: 25, to: startOfDay)
+            ?? startOfDay.addingTimeInterval(25 * 60 * 60)
     }
 
     private func currentBehaviorSnapshot() -> AlarmBehaviorSnapshot {

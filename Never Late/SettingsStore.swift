@@ -50,13 +50,40 @@ enum SettingsKeys {
 
 enum SettingsSnapshot {
     static func selectedCalendarIds() -> Set<String> {
+        if Thread.isMainThread {
+            return SettingsStore.shared.selectedCalendarIds
+        }
         if let saved = UserDefaults.standard.array(forKey: SettingsKeys.selectedCalendarIds) as? [String] {
             return Set(saved)
         }
         return []
     }
 
+    /// Returns the current alarm behavior. On the main thread, reads from the in-memory
+    /// SettingsStore to guarantee consistency with UI state. Off main thread (e.g. background
+    /// refresh), falls back to UserDefaults.
     static func alarmBehavior() -> AlarmBehaviorSnapshot {
+        if Thread.isMainThread {
+            let store = SettingsStore.shared
+            return AlarmBehaviorSnapshot(
+                barrageCount: store.barrageCount,
+                barrageIntervalSeconds: store.barrageIntervalSeconds,
+                snoozeMinutes: store.snoozeMinutes,
+                timeToLeaveEnabled: store.timeToLeaveEnabled,
+                timeToLeavePrepMinutes: store.timeToLeavePrepMinutes,
+                timeToLeaveFallbackMinutes: store.timeToLeaveFallbackMinutes,
+                timeToLeaveTransport: store.timeToLeaveTransport,
+                geofenceEnabled: store.geofenceEnabled,
+                geofenceDefaultRadiusMeters: store.geofenceDefaultRadiusMeters,
+                geofenceRearmMinutes: store.geofenceRearmMinutes,
+                snoozedUntil: store.snoozedUntil
+            )
+        }
+        return alarmBehaviorFromDefaults()
+    }
+
+    /// Background-safe path: reads directly from UserDefaults.
+    private static func alarmBehaviorFromDefaults() -> AlarmBehaviorSnapshot {
         let savedCount = UserDefaults.standard.integer(forKey: SettingsKeys.barrageCount)
         let savedInterval = UserDefaults.standard.integer(forKey: SettingsKeys.barrageIntervalSeconds)
         let savedSnooze = UserDefaults.standard.integer(forKey: SettingsKeys.snoozeMinutes)
@@ -216,6 +243,18 @@ final class SettingsStore: ObservableObject {
         set { loggingVerbosityRaw = newValue.rawValue }
     }
 
+    private var isBatchUpdating = false
+
+    /// Apply multiple property changes with a single UserDefaults write.
+    /// Prevents partial-state persistence if the app crashes mid-batch.
+    func batchUpdate(_ updates: () -> Void) {
+        isBatchUpdating = true
+        updates()
+        isBatchUpdating = false
+        save()
+        applyLoggingConfiguration()
+    }
+
     private init() {
         if let saved = UserDefaults.standard.array(forKey: SettingsKeys.selectedCalendarIds) as? [String] {
             selectedCalendarIds = Set(saved)
@@ -267,6 +306,7 @@ final class SettingsStore: ObservableObject {
     }
 
     private func save() {
+        guard !isBatchUpdating else { return }
         UserDefaults.standard.set(Array(selectedCalendarIds), forKey: SettingsKeys.selectedCalendarIds)
         UserDefaults.standard.set(didChooseCalendars, forKey: SettingsKeys.didChooseCalendars)
         UserDefaults.standard.set(barrageCount, forKey: SettingsKeys.barrageCount)

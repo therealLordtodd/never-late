@@ -6,23 +6,40 @@ import UserNotifications
 enum NotificationConstants {
     static let categoryId = "NL_ALARM"
     static let snoozeActionId = "SNOOZE_ALARM"
-    static let stopActionId = "STOP_ALARM"
+    static let dismissActionId = "DISMISS_ALARM"
+    static let legacyStopActionId = "STOP_ALARM"
     static let requestPrefix = "event-alarm-"
     static let barragePrefix = "barrage-alarm-"
     static let snoozeWakePrefix = "snooze-alarm-"
     static let snoozeBarragePrefix = "snooze-barrage-"
     static let geofenceRequestPrefix = "geofence-alarm-"
     static let geofenceBarragePrefix = "geofence-barrage-"
-    static let threadId = "nl-alarm-thread"
     static let contentId = "nl-active-alarm"
 }
 
 final class NotificationScheduler {
     private let center = UNUserNotificationCenter.current()
+    private static let logDateTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
+        return formatter
+    }()
+    private static let logTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
 
     func requestAuthorization() async -> Bool {
         do {
-            let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            var options: UNAuthorizationOptions = [.alert, .sound, .badge]
+            if #available(iOS 15.0, *) {
+                options.insert(.timeSensitive)
+            }
+            let granted = try await center.requestAuthorization(options: options)
+            await logNotificationSettings(context: "request-authorization")
             return granted
         } catch {
             AppLog.app.error("Notification authorization failed: \(error.localizedDescription)")
@@ -37,22 +54,20 @@ final class NotificationScheduler {
 
     func registerCategories() {
         let behavior = SettingsSnapshot.alarmBehavior()
-        let stop = UNNotificationAction(
-            identifier: NotificationConstants.stopActionId,
-            title: "Stop Alarm",
-            options: [.destructive]
-        )
         let snoozeTitle = "Snooze \(behavior.snoozeMinutes) min"
         let snooze = UNNotificationAction(
             identifier: NotificationConstants.snoozeActionId,
             title: snoozeTitle,
             options: []
         )
+        // .customDismissAction makes the system dismiss (swipe / X button) trigger our
+        // didReceive handler so we can clear all pending barrage notifications at once.
+        // No custom dismiss action needed — the system dismiss button is the standard UX.
         let category = UNNotificationCategory(
             identifier: NotificationConstants.categoryId,
-            actions: [stop, snooze],
+            actions: [snooze],
             intentIdentifiers: [],
-            options: [.customDismissAction]
+            options: [.customDismissAction, .hiddenPreviewsShowTitle]
         )
         center.setNotificationCategories([category])
     }
@@ -60,8 +75,7 @@ final class NotificationScheduler {
     func clearPendingEventAlarms() async {
         let requests = await center.pendingNotificationRequests()
         let identifiers = requests.compactMap { request -> String? in
-            if request.identifier.hasPrefix(NotificationConstants.requestPrefix)
-                || request.identifier.hasPrefix(NotificationConstants.barragePrefix) {
+            if request.identifier.hasPrefix(NotificationConstants.requestPrefix) {
                 return request.identifier
             }
             return nil
@@ -69,6 +83,22 @@ final class NotificationScheduler {
         guard identifiers.isEmpty == false else { return }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
         AppLog.app.info("Cleared pending event alarms (count: \(identifiers.count))")
+    }
+
+    private func clearPendingEventBarrages(exceptKey: String?) async {
+        let requests = await center.pendingNotificationRequests()
+        let keepPrefix = exceptKey.map { NotificationConstants.barragePrefix + $0 + "-" }
+        let identifiers = requests.compactMap { request -> String? in
+            let id = request.identifier
+            guard id.hasPrefix(NotificationConstants.barragePrefix) else { return nil }
+            if let keepPrefix, id.hasPrefix(keepPrefix) {
+                return nil
+            }
+            return id
+        }
+        guard identifiers.isEmpty == false else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        AppLog.app.info("Cleared pending event barrages (count: \(identifiers.count))")
     }
 
     func clearPersistentAlarms() async {
@@ -105,9 +135,13 @@ final class NotificationScheduler {
         center.removeDeliveredNotifications(withIdentifiers: identifiers)
     }
 
+    /// iOS caps pending local notifications at 64 per app.
+    private static let iosNotificationLimit = 64
+    /// Slots reserved for snooze-wake, geofence triggers, and headroom.
+    private static let reservedSlots = 4
+
     func schedule(alarms: [CalendarEventAlarm]) async {
-        await clearPendingEventAlarms()
-        await clearDeliveredAlarmNotifications()
+        await logNotificationSettings(context: "schedule")
         registerCategories()
 
         let now = Date()
@@ -145,7 +179,49 @@ final class NotificationScheduler {
             "Scheduling alarms total=\(effectiveAlarms.count) schedulable=\(schedulableAlarms.count) proximity=\(proximityAlarms.count) geofenceActive=\(canUseGeofence)"
         )
         let barrageTarget = isSnoozeActive ? nil : schedulableAlarms.min { $0.fireDate < $1.fireDate }
-        for alarm in schedulableAlarms {
+        let barrageKey = barrageTarget.map(eventBarrageKey(for:))
+
+        // Fetch all pending once to avoid redundant queries.
+        let allPending = await center.pendingNotificationRequests()
+
+        // Compute removal lists from the single snapshot.
+        let eventIdsToRemove = allPending
+            .compactMap { $0.identifier.hasPrefix(NotificationConstants.requestPrefix) ? $0.identifier : nil }
+        let keepPrefix = barrageKey.map { NotificationConstants.barragePrefix + $0 + "-" }
+        let barrageIdsToRemove = allPending.compactMap { request -> String? in
+            let id = request.identifier
+            guard id.hasPrefix(NotificationConstants.barragePrefix) else { return nil }
+            if let keepPrefix, id.hasPrefix(keepPrefix) { return nil }
+            return id
+        }
+
+        // Cap event alarms to stay within iOS 64-notification limit.
+        let reservedForBarrage = barrageTarget != nil ? max(1, behavior.barrageCount) : 0
+        let nonEventPendingCount = allPending.filter { req in
+            !req.identifier.hasPrefix(NotificationConstants.requestPrefix)
+                && !barrageIdsToRemove.contains(req.identifier)
+        }.count
+        let maxEventSlots = max(
+            0,
+            Self.iosNotificationLimit - reservedForBarrage - Self.reservedSlots - nonEventPendingCount
+        )
+        let cappedAlarms = Array(schedulableAlarms.prefix(maxEventSlots))
+        if cappedAlarms.count < schedulableAlarms.count {
+            AppLog.app.warning(
+                "Capped event alarms to stay within iOS 64-notification limit.",
+                metadata: [
+                    "scheduled": "\(cappedAlarms.count)",
+                    "total": "\(schedulableAlarms.count)",
+                    "dropped": "\(schedulableAlarms.count - cappedAlarms.count)",
+                    "nonEventPending": "\(nonEventPendingCount)",
+                    "reservedBarrage": "\(reservedForBarrage)"
+                ]
+            )
+        }
+
+        // Build all new requests before clearing old ones to minimize the notification gap.
+        var newRequests: [UNNotificationRequest] = []
+        for alarm in cappedAlarms {
             let event = alarm.event
             let fireDate = alarm.fireDate
 
@@ -164,29 +240,58 @@ final class NotificationScheduler {
                 "eventTitle": event.title ?? "Calendar Alarm",
                 "alarmKind": alarm.kind.rawValue
             ]
+            content.threadIdentifier = threadIdentifier(for: alarm)
 
-            let components = Calendar.current.dateComponents(
-                [.year, .month, .day, .hour, .minute, .second],
-                from: fireDate
-            )
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            let scheduledFireDate = max(fireDate, now.addingTimeInterval(1))
+            let trigger = makeDateTrigger(for: scheduledFireDate)
             let identifier = NotificationConstants.requestPrefix + UUID().uuidString
-            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+            newRequests.append(
+                UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+            )
+        }
 
+        // Remove old then add new in quick succession to minimize the gap.
+        let allIdsToRemove = eventIdsToRemove + barrageIdsToRemove
+        if allIdsToRemove.isEmpty == false {
+            center.removePendingNotificationRequests(withIdentifiers: allIdsToRemove)
+        }
+
+        var failedCount = 0
+        for request in newRequests {
             do {
                 try await center.add(request)
             } catch {
+                failedCount += 1
                 AppLog.app.error("Failed to schedule notification: \(error.localizedDescription)")
             }
+        }
+        if failedCount > 0 {
+            AppLog.app.warning(
+                "Some alarm notifications failed to schedule.",
+                metadata: ["failed": "\(failedCount)", "attempted": "\(newRequests.count)"]
+            )
         }
 
         if let target = barrageTarget {
             await schedulePersistentBurst(
                 title: target.event.title ?? "Calendar Alarm",
                 start: target.fireDate,
-                prefix: NotificationConstants.barragePrefix
+                prefix: NotificationConstants.barragePrefix,
+                stableIdBase: (barrageKey.map { NotificationConstants.barragePrefix + $0 + "-" }),
+                threadIdentifier: threadIdentifier(for: target)
             )
         }
+
+        AppLog.app.info(
+            "Finished scheduling notifications.",
+            metadata: [
+                "scheduled": "\(newRequests.count - failedCount)",
+                "failed": "\(failedCount)",
+                "capped": "\(cappedAlarms.count < schedulableAlarms.count)"
+            ]
+        )
+        await logPendingAlarmSnapshot(context: "event-refresh")
+        await logDeliveredAlarmSnapshot(context: "event-refresh")
     }
 
     func scheduleGeofenceTrigger(title: String, body: String) async {
@@ -210,6 +315,7 @@ final class NotificationScheduler {
             "alarmKind": CalendarEventAlarmKind.calendar.rawValue,
             "source": "geofence"
         ]
+        content.threadIdentifier = geofenceThreadIdentifier(title: title)
 
         do {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
@@ -222,8 +328,11 @@ final class NotificationScheduler {
             await schedulePersistentBurst(
                 title: title,
                 start: now,
-                prefix: NotificationConstants.geofenceBarragePrefix
+                prefix: NotificationConstants.geofenceBarragePrefix,
+                threadIdentifier: geofenceThreadIdentifier(title: title)
             )
+            await logPendingAlarmSnapshot(context: "geofence-trigger")
+            await logDeliveredAlarmSnapshot(context: "geofence-trigger")
         } catch {
             AppLog.app.error("Failed to schedule geofence trigger: \(error.localizedDescription)")
         }
@@ -239,6 +348,7 @@ final class NotificationScheduler {
         content.title = title
         content.body = "Snoozed"
         configureAlarmContent(content)
+        content.threadIdentifier = snoozeThreadIdentifier(title: title)
 
         let snoozeInterval = TimeInterval(behavior.snoozeMinutes * 60)
         let snoozedUntil = Date().addingTimeInterval(snoozeInterval)
@@ -255,8 +365,11 @@ final class NotificationScheduler {
             await schedulePersistentBurst(
                 title: title,
                 start: snoozedUntil,
-                prefix: NotificationConstants.snoozeBarragePrefix
+                prefix: NotificationConstants.snoozeBarragePrefix,
+                threadIdentifier: snoozeThreadIdentifier(title: title)
             )
+            await logPendingAlarmSnapshot(context: "snooze")
+            await logDeliveredAlarmSnapshot(context: "snooze")
         } catch {
             AppLog.app.error("Failed to schedule snooze: \(error.localizedDescription)")
         }
@@ -266,48 +379,248 @@ final class NotificationScheduler {
         SettingsSnapshot.setSnoozedUntil(nil)
     }
 
+    func logDeliveredAlarmSnapshot(context: String) async {
+        let delivered = await center.deliveredNotifications()
+            .filter { isAlarmRequestIdentifier($0.request.identifier) }
+            .sorted { $0.date > $1.date }
+
+        let latest = delivered.first
+        let latestAt = latest.map { Self.logDateTimeFormatter.string(from: $0.date) } ?? "none"
+        let latestTitle = latest?.request.content.title ?? "none"
+        let latestId = latest?.request.identifier ?? "none"
+        let latestThree = delivered
+            .prefix(3)
+            .map { notification in
+                let title = notification.request.content.title.isEmpty ? "Alarm" : notification.request.content.title
+                let time = Self.logTimeFormatter.string(from: notification.date)
+                return "\(title) @ \(time)"
+            }
+            .joined(separator: " | ")
+        let latestThreeText = latestThree.isEmpty ? "none" : latestThree
+
+        AppLog.app.info(
+            "Delivered alarm snapshot.",
+            metadata: [
+                "context": context,
+                "deliveredAlarmCount": "\(delivered.count)",
+                "latestDeliveredAt": latestAt,
+                "latestDeliveredId": latestId,
+                "latestDeliveredTitle": latestTitle,
+                "latestThree": latestThreeText
+            ]
+        )
+    }
+
     private func schedulePersistentBurst(
         title: String,
         start: Date,
-        prefix: String
+        prefix: String,
+        stableIdBase: String? = nil,
+        threadIdentifier: String
     ) async {
         let behavior = SettingsSnapshot.alarmBehavior()
         let count = max(1, behavior.barrageCount)
         let interval = TimeInterval(max(1, behavior.barrageIntervalSeconds))
         guard count > 0 else { return }
+        let now = Date()
+        var failedCount = 0
 
         for index in 1...count {
             let fireDate = start.addingTimeInterval(interval * Double(index))
+            if fireDate <= now {
+                continue
+            }
             let content = UNMutableNotificationContent()
             content.title = title
             content.body = "Alarm"
             configureAlarmContent(content)
+            content.threadIdentifier = threadIdentifier
 
-            let components = Calendar.current.dateComponents(
-                [.year, .month, .day, .hour, .minute, .second],
-                from: fireDate
-            )
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-            let identifier = prefix + UUID().uuidString
+            let trigger = makeDateTrigger(for: fireDate)
+            let identifier: String
+            if let stableIdBase {
+                identifier = "\(stableIdBase)\(index)"
+            } else {
+                identifier = prefix + UUID().uuidString
+            }
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
             do {
                 try await center.add(request)
             } catch {
+                failedCount += 1
                 AppLog.app.error("Failed to schedule persistent alarm: \(error.localizedDescription)")
-                break
             }
         }
+        if failedCount > 0 {
+            AppLog.app.warning(
+                "Some barrage notifications failed to schedule.",
+                metadata: ["failed": "\(failedCount)", "total": "\(count)"]
+            )
+        }
+    }
+
+    private func makeDateTrigger(for fireDate: Date) -> UNNotificationTrigger {
+        let interval = max(1, fireDate.timeIntervalSinceNow)
+        return UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+    }
+
+    private func logNotificationSettings(context: String) async {
+        let settings = await center.notificationSettings()
+        AppLog.app.info(
+            "Notification settings snapshot.",
+            metadata: [
+                "context": context,
+                "authorization": authorizationStatusLabel(settings.authorizationStatus),
+                "alert": notificationSettingLabel(settings.alertSetting),
+                "lockScreen": notificationSettingLabel(settings.lockScreenSetting),
+                "notificationCenter": notificationSettingLabel(settings.notificationCenterSetting),
+                "banner": alertStyleLabel(settings.alertStyle),
+                "sound": notificationSettingLabel(settings.soundSetting),
+                "scheduledDelivery": notificationSettingLabel(settings.scheduledDeliverySetting),
+                "timeSensitive": notificationSettingLabel(settings.timeSensitiveSetting)
+            ]
+        )
+
+        if settings.authorizationStatus != .authorized && settings.authorizationStatus != .provisional {
+            AppLog.app.warning("Notifications are not fully authorized.")
+        }
+        if settings.alertSetting != .enabled {
+            AppLog.app.warning("Alert presentation is disabled in iOS notification settings.")
+        }
+        if settings.lockScreenSetting != .enabled {
+            AppLog.app.warning("Lock screen alerts are disabled in iOS notification settings.")
+        }
+        if settings.soundSetting != .enabled {
+            AppLog.app.warning("Notification sound is disabled in iOS notification settings.")
+        }
+        if settings.scheduledDeliverySetting == .enabled && settings.timeSensitiveSetting != .enabled {
+            AppLog.app.warning("Scheduled Summary is enabled and Time Sensitive is not enabled; alarm delivery may be delayed.")
+        }
+    }
+
+    private func logPendingAlarmSnapshot(context: String) async {
+        let requests = await center.pendingNotificationRequests()
+        let alarmRequests = requests.filter { isAlarmRequestIdentifier($0.identifier) }
+        let now = Date()
+
+        let withDates = alarmRequests.compactMap { request -> (UNNotificationRequest, Date)? in
+            guard let date = triggerDate(from: request.trigger) else { return nil }
+            return (request, date)
+        }
+        .sorted { $0.1 < $1.1 }
+
+        let next = withDates.first
+        let nextAt = next.map { Self.logDateTimeFormatter.string(from: $0.1) } ?? "none"
+        let nextInSeconds = next.map { max(0, Int($0.1.timeIntervalSince(now))) } ?? -1
+        let nextIdentifier = next?.0.identifier ?? "none"
+        let nextTitle = next?.0.content.title ?? "none"
+        let preview = withDates
+            .prefix(3)
+            .map { item in
+                let title = item.0.content.title.isEmpty ? "Alarm" : item.0.content.title
+                let time = Self.logTimeFormatter.string(from: item.1)
+                return "\(title) @ \(time)"
+            }
+            .joined(separator: " | ")
+        let previewText = preview.isEmpty ? "none" : preview
+
+        AppLog.app.info(
+            "Pending alarm snapshot.",
+            metadata: [
+                "context": context,
+                "pendingAlarmCount": "\(alarmRequests.count)",
+                "nextAlarmAt": nextAt,
+                "nextAlarmInSeconds": "\(nextInSeconds)",
+                "nextAlarmId": nextIdentifier,
+                "nextAlarmTitle": nextTitle,
+                "nextThree": previewText
+            ]
+        )
+    }
+
+    private func isAlarmRequestIdentifier(_ identifier: String) -> Bool {
+        identifier.hasPrefix(NotificationConstants.requestPrefix)
+            || identifier.hasPrefix(NotificationConstants.barragePrefix)
+            || identifier.hasPrefix(NotificationConstants.snoozeWakePrefix)
+            || identifier.hasPrefix(NotificationConstants.snoozeBarragePrefix)
+            || identifier.hasPrefix(NotificationConstants.geofenceRequestPrefix)
+            || identifier.hasPrefix(NotificationConstants.geofenceBarragePrefix)
+    }
+
+    private func triggerDate(from trigger: UNNotificationTrigger?) -> Date? {
+        if let trigger = trigger as? UNCalendarNotificationTrigger {
+            return trigger.nextTriggerDate()
+        }
+        if let trigger = trigger as? UNTimeIntervalNotificationTrigger {
+            return trigger.nextTriggerDate()
+        }
+        return nil
+    }
+
+    private func eventBarrageKey(for alarm: CalendarEventAlarm) -> String {
+        let eventKey = sanitizeIdentifier(alarm.event.calendarItemIdentifier)
+        let fireSecond = Int(alarm.fireDate.timeIntervalSince1970)
+        return "\(eventKey)-\(alarm.kind.rawValue)-\(fireSecond)"
     }
 
     private func configureAlarmContent(_ content: UNMutableNotificationContent) {
         content.sound = .default
         content.categoryIdentifier = NotificationConstants.categoryId
-        content.threadIdentifier = NotificationConstants.threadId
         if #available(iOS 15.0, *) {
             content.interruptionLevel = .timeSensitive
             content.relevanceScore = 1
-            content.targetContentIdentifier = NotificationConstants.contentId
+        }
+    }
+
+    private func threadIdentifier(for alarm: CalendarEventAlarm) -> String {
+        let eventKey = sanitizeIdentifier(alarm.event.calendarItemIdentifier)
+        return "nl-event-\(eventKey)"
+    }
+
+    private func geofenceThreadIdentifier(title: String) -> String {
+        "nl-geofence-\(sanitizeIdentifier(title))"
+    }
+
+    private func snoozeThreadIdentifier(title: String) -> String {
+        "nl-snooze-\(sanitizeIdentifier(title))"
+    }
+
+    private func sanitizeIdentifier(_ raw: String) -> String {
+        let sanitized = raw.replacingOccurrences(
+            of: "[^a-zA-Z0-9_-]",
+            with: "-",
+            options: .regularExpression
+        )
+        return sanitized.isEmpty ? "alarm" : sanitized
+    }
+
+    private func notificationSettingLabel(_ setting: UNNotificationSetting) -> String {
+        switch setting {
+        case .notSupported: return "notSupported"
+        case .disabled: return "disabled"
+        case .enabled: return "enabled"
+        @unknown default: return "unknown"
+        }
+    }
+
+    private func authorizationStatusLabel(_ status: UNAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined: return "notDetermined"
+        case .denied: return "denied"
+        case .authorized: return "authorized"
+        case .provisional: return "provisional"
+        case .ephemeral: return "ephemeral"
+        @unknown default: return "unknown"
+        }
+    }
+
+    private func alertStyleLabel(_ style: UNAlertStyle) -> String {
+        switch style {
+        case .none: return "none"
+        case .banner: return "banner"
+        case .alert: return "alert"
+        @unknown default: return "unknown"
         }
     }
 }
@@ -329,6 +642,9 @@ extension Notification.Name {
     static let geofenceAuthorizationDidChange = Notification.Name("GeofenceAuthorizationDidChange")
 }
 
+/// Threading model: All mutable state and CLLocationManager interactions run on the main thread.
+/// CLLocationManager was created on main (via AppDelegate), so delegate callbacks arrive on main.
+/// Public methods dispatch to main explicitly. Do not call mutable-state methods from background queues.
 final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
     static let shared = GeofenceAlarmMonitor()
 
@@ -359,7 +675,6 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
 
     func canMonitorProximityAlarms() -> Bool {
         guard CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) else { return false }
-        guard CLLocationManager.locationServicesEnabled() else { return false }
         return manager.authorizationStatus == .authorizedAlways
     }
 
@@ -377,11 +692,6 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
         }
         guard CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) else {
             AppLog.app.warning("Region monitoring is unavailable on this device.")
-            stopAllManagedRegions()
-            return
-        }
-        guard CLLocationManager.locationServicesEnabled() else {
-            AppLog.app.warning("Location services are disabled; cannot monitor geofence alarms.")
             stopAllManagedRegions()
             return
         }
@@ -426,7 +736,6 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
     }
 
     private func ensureAuthorizationForMonitoring() {
-        guard CLLocationManager.locationServicesEnabled() else { return }
         switch manager.authorizationStatus {
         case .notDetermined:
             manager.requestAlwaysAuthorization()
@@ -501,6 +810,7 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
     }
 
     private func shouldProcessTrigger(for regionId: String) -> Bool {
+        dispatchPrecondition(condition: .onQueue(.main))
         let now = Date()
         let behavior = SettingsSnapshot.alarmBehavior()
         let cooldown = TimeInterval(max(1, behavior.geofenceRearmMinutes) * 60)
@@ -513,6 +823,7 @@ final class GeofenceAlarmMonitor: NSObject, CLLocationManagerDelegate {
     }
 
     private func handleRegionTrigger(_ region: CLRegion) {
+        dispatchPrecondition(condition: .onQueue(.main))
         guard region.identifier.hasPrefix(GeofenceConstants.regionPrefix) else { return }
         guard shouldProcessTrigger(for: region.identifier) else { return }
 
